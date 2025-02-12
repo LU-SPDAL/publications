@@ -442,7 +442,7 @@ f.pq <- function(x, xx, yy, delta, w1, w2, m1, m2, alpha, gamma){
                  control = list('stepmax' = 0.1))$x
   
   p <- sum(w1/ (1 + get[1] * f.w(xx, get[3], 0)))
-  q <- sum(w1/ (1 + get[2] * f.w(yy, get[3], delta)))
+  q <- sum(w2/ (1 + get[2] * f.w(yy, get[3], delta)))
   return(c(p, q))
 }
 
@@ -626,7 +626,7 @@ EL.stm <- function(x, y, alpha, gamma, level = 0.95, step = 0.1, delta0 = 0, plo
       hi <- hi + step
     }
     
-    # delta.return <- optimise(function(d)f.ell(x, xx, yy, w1, w2, m1, m2, d), interval = c(lo, hi))$minimum
+    delta.return <- optimise(function(d)f.ell(x, xx, yy, w1, w2, m1, m2, d, alpha, gamma), interval = c(lo, hi))$minimum
     ci <- c(uniroot(function(d) 2*a*f.ell(x, xx, yy, w1, w2, m1, m2, d, alpha, gamma)  - crit.val, c(lo, delta.return))$root,
             uniroot(function(d) 2*a*f.ell(x, xx, yy, w1, w2, m1, m2, d, alpha, gamma)  - crit.val, c(delta.return, hi))$root)
     
@@ -651,7 +651,7 @@ EL.stm <- function(x, y, alpha, gamma, level = 0.95, step = 0.1, delta0 = 0, plo
     dd <- seq(ci[1] - 0.1, ci[2] + 0.1, by = 0.01)
     
     el <- ggplot()+
-      geom_line(aes(x = dd, y = 2*a*sapply(dd, function(dd) f.ell(x, xx, yy, w1, w2, m1, m2, dd))), linewidth = 1.2)+
+      geom_line(aes(x = dd, y = 2*a*sapply(dd, function(dd) f.ell(x, xx, yy, w1, w2, m1, m2, dd, alpha, gamma))), linewidth = 1.2)+
       geom_hline(yintercept = qchisq(0.95, df = 1), col = 'red', lty = 2, linewidth = 1.5)+
       xlab(expression(Delta))+
       ylab(expression(-2*a*log(mu,Delta)))+
@@ -669,7 +669,7 @@ EL.stm <- function(x, y, alpha, gamma, level = 0.95, step = 0.1, delta0 = 0, plo
   # ))
   return(list('conf.int' = ci
               # ,'st' = st
-              # ,'est' = delta.return
+              ,'est' = delta.return
               # ,'p.value' = 1 - pchisq(st, df = 1)
               ,'pq' = pq
               ,'ell.plot' = el
@@ -782,7 +782,7 @@ ANOVA.stm <- function(w, alpha, gamma){
   F.st1 <- 1/(k-1) * sum(wj.1 * (stm - x.1)^2)/ (1 + 2*(k-2)/(k^2 - 1) * sum(1/(m-1) * (1-wj.1/w.1)^2))
   df1 <- (k^2 - 1)/(3*sum(1/(m-1) * (1-wj.1/w.1)^2))  
   
-  return(list('p.value' = pf(F.st1, k-1, df1),
+  return(list('p.value' = 1-pf(F.st1, k-1, df1),
               'F' = F.st1,
               'df' = c(k-1, df1)))
   
