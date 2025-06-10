@@ -1,5 +1,6 @@
 library(tidyverse)
 library(rstatix)
+library(PairedData)
 source('functions.R')
 
 data0 <- openxlsx::read.xlsx('datu_kopas.xlsx', sheet = 'cloth')
@@ -10,10 +11,9 @@ y.2 <- data0$Mill_b
 data1 <- data.frame('x' = c(x.2, y.2), 
                     'gr' = c(rep('Mill_A', length(x.2)), rep('Mill_B', length(y.2))))
 
-data1 %>% 
+st <- data1 %>% 
   group_by(gr) %>% 
   summarise(mean = mean(x),
-            sd = sd(x),
             tm_005 = mean(x, trim = 0.05),
             tm_01 = mean(x, trim = 0.1),
             stm_005 = ST_mean(x, alpha = 0.05, gamma = 0.2),
@@ -21,11 +21,42 @@ data1 %>%
             n = n()) %>% 
   ungroup() %>% 
   mutate(gr = paste(gr, ' (n = ', n, ')', sep = '')) %>% 
-  select(-n) %>% 
-  xtable::xtable()
+  dplyr::select(-n) %>% 
+  ungroup() %>%  
+  t() 
+  
+nam <- st[1,]
+st <- as.data.frame(st[-1,])
+names(st) <- nam
 
+st <- st %>% 
+  mutate(est = row.names(st)) %>% 
+  dplyr::select(est, `Mill_A (n = 22)`, `Mill_B (n = 22)`)
 
+x <- data1 %>% 
+  filter(gr == 'Mill_A') %>% 
+  dplyr::select(x) %>% 
+  unlist()
+y <- data1 %>% 
+  filter(gr == 'Mill_B') %>% 
+  dplyr::select(x)%>% 
+  unlist()
+
+gamma <- 0.2
 alpha <- c(0.05, 0.1)
+
+p.t <- t.test(x, y)$p.value
+p.tm.y <- c(yuen.t.test(x, y, tr = alpha[1])$p.value, yuen.t.test(x, y, tr = alpha[2])$p.value)
+
+p.tm.el <- c(EL.tm(x, y, alpha = alpha[1], beta = alpha[1])$p.value, EL.tm(x, y, alpha = alpha[2], beta = alpha[2])$p.value)
+
+p.stm.y <- c(yuen.stm(x, y, alpha = alpha[1], gamma = gamma)$p.value, yuen.stm(x, y, alpha = alpha[2], gamma = gamma)$p.value)
+p.stm.el <- c(EL.stm(x, y, alpha = alpha[1], gamma = gamma)$p.value, EL.stm(x, y, alpha = alpha[2], gamma = gamma)$p.value)
+
+p.tab <- data.frame(est = st$est, p.t = c(p.t, p.tm.y, p.stm.y), p.el = c(NA, p.tm.el, p.stm.el))
+
+rez <- left_join(st, p.tab)
+openxlsx::write.xlsx(rez, 'p_tab.xlsx', row.names = FALSE)
 
 data1 %>% 
   ggplot(aes(x = gr, y = x))+
@@ -76,8 +107,8 @@ names(ci.el.stm) <- c('lb', 'ub', 'alpha')
 
 ci.t.tm$method <- c('T_TM', 'T_TM')
 ci.el.tm$method <- c('EL_TM', 'EL_TM')
-ci.t.stm$method <- c('T_Ln', 'T_Ln')
-ci.el.stm$method <- c('EL_Ln', 'EL_Ln')
+ci.t.stm$method <- c('T_ST', 'T_ST')
+ci.el.stm$method <- c('EL_ST', 'EL_ST')
 
 d.t.tm <- as.data.frame(cbind(d.t.tm, alpha))
 d.el.tm <- as.data.frame(cbind(d.el.tm, alpha))
@@ -91,8 +122,8 @@ names(d.el.stm) <- c('est', 'alpha')
 
 d.t.tm$method <- c('T_TM', 'T_TM')
 d.el.tm$method <- c('EL_TM', 'EL_TM')
-d.t.stm$method <- c('T_Ln', 'T_Ln')
-d.el.stm$method <- c('EL_Ln', 'EL_Ln')
+d.t.stm$method <- c('T_ST', 'T_ST')
+d.el.stm$method <- c('EL_ST', 'EL_ST')
 
 
 ci.tab <- rbind(data.frame('lb' = ci.t[1], 'ub' = ci.t[2], est = mean(x.2) - mean(y.2), alpha = NA, method = 'T'),
@@ -123,64 +154,6 @@ data0 %>%
   ylab('Cloth')
 
 
-histA.full <- data0 %>% 
-  ggplot(aes(x = Mill_a))+
-  geom_histogram(fill = 'white', col = 'black', bins = 10)+
-  xlab('Mill A')+
-  theme_minimal()
-
-
-n <- length(data0$Mill_a)
-r <- floor(alpha[1] * n)
-trimmed <- sort(data0$Mill_a)[(r+1):(n-r)]
-
-histA.tr1 <- ggplot(aes(x = trimmed), data = NULL)+
-  geom_histogram(fill = 'white', col = 'black', bins = 10)+
-  xlab('Mill A')+
-  theme_minimal()
-
-
-r2 <- floor(alpha[2] * n)
-trimmed2 <- sort(data0$Mill_a)[(r2+1):(n-r2)]
-
-histA.tr2 <- ggplot(aes(x = trimmed2), data = NULL)+
-  geom_histogram(fill = 'white', col = 'black', bins = 10)+
-  xlab('Mill A')+
-  theme_minimal()
-
-
-
-histB.full <- data0 %>% 
-  ggplot(aes(x = Mill_b))+
-  geom_histogram(fill = 'white', col = 'black', bins = 10)+
-  xlab('Mill B')+
-  theme_minimal()
-
-
-n <- length(data0$Mill_b)
-r <- floor(alpha[1] * n)
-trimmedb <- sort(data0$Mill_b)[(r+1):(n-r)]
-
-histB.tr1 <- ggplot(aes(x = trimmedb), data = NULL)+
-  geom_histogram(fill = 'white', col = 'black', bins = 10)+
-  xlab('Mill B')+
-  theme_minimal()
-
-
-r2 <- floor(alpha[2] * n)
-trimmedb2 <- sort(data0$Mill_b)[(r2+1):(n-r2)]
-
-histB.tr2 <- ggplot(aes(x = trimmedb2), data = NULL)+
-  geom_histogram(fill = 'white', col = 'black', bins = 10)+
-  xlab('Mill B')+
-  theme_minimal()
-
-
-ggpubr::ggarrange(histA.full, histA.tr1, histA.tr2,
-                  histB.full, histB.tr1, histB.tr2, ncol = 3, nrow = 2,
-                  labels = c('', 'trimming proportion : 0.05', 'trimming proportion : 0.1',
-                             '', 'trimming proportion : 0.05', 'trimming proportion : 0.1'),
-                  font.label = list(size = 10))
 
 # ggsave('hist.png', bg = 'white')
 
@@ -389,10 +362,10 @@ Zn <- OsloTransect %>%
 
 # names(OsloTransect)
 ggpubr::ggarrange(Ag, B, Ba, Ca, Cd, Co, Cu, Fe, Hg, K, La, nrow = 4, ncol = 3)
-ggsave('bp_anova1.png', width = 10, bg = 'white')
+# ggsave('bp_anova1.png', width = 10, bg = 'white')
 
 ggpubr::ggarrange(Mg, Mn, Mo, Ni, P, Pb, S, Sb, Sr, Ti, Zn, nrow = 4, ncol = 3)
-ggsave('bp_anova2.png', width = 10, bg = 'white')
+# ggsave('bp_anova2.png', width = 10, bg = 'white')
 
 rez1 <- OsloTransect %>% 
   pivot_longer(cols = 2:24) %>% 
@@ -401,11 +374,11 @@ rez1 <- OsloTransect %>%
             sd = sd(value, na.rm = TRUE)) %>% 
   ungroup() %>% 
   mutate(mean = paste(round(mean,3), ' (', round(sd,3), ')', sep = '')) %>% 
-  select(-sd) %>% 
+  dplyr::select(-sd) %>% 
   pivot_wider(names_from = 1, values_from = 3)
 
 rez2 <- OsloTransect %>% 
-  select(-FILTHO) %>% 
+  dplyr::select(-FILTHO) %>% 
   pivot_longer(cols = 1:23) %>% 
   group_by(name) %>% 
   summarise(`Whole cohort` = paste(round(mean(value, na.rm = TRUE),3), ' (', round(sd(value, na.rm = TRUE),3), ')', sep = ''))
