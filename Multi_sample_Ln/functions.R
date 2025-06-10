@@ -409,12 +409,14 @@ yuen.stm <- function(x, y, alpha = 0.1, gamma = 0.1){
     (var.x^2/df1+
        var.y^2/df2)
   
+  p <- pt(t, df)
   
   ci <- c(delta - qt(p = 0.975, df = df)*se, delta + qt(p = 0.975, df = df)*se)
   return(list('st' = t,
               'df' = df,
               'conf.int' = ci,
-              'estimate' = -1*delta))
+              'estimate' = -1*delta,
+              'p.value' = p))
 }
 
 
@@ -426,15 +428,6 @@ f.lam <- function(x, w,  mu, delta, lam){
   sum(w * f.w(x, mu, delta) / (1 + lam * f.w(x, mu, delta)))
 }
 
-get.est <- function(xsamp, ysamp, w1, w2, delta, m1, m2, l){
-  ll <- numeric(3)
-  ll[1] <- f.lam(xsamp, w1, l[3], 0, l[1])
-  ll[2] <- f.lam(ysamp, w2, l[3], delta, l[2])
-  
-  ll[3] <- m1 * l[1] * sum(w1 /(1 + l[1] * f.w(xsamp, l[3], 0))) +  
-    m2 * l[2] * sum(w2 /(1 + l[2] * f.w(ysamp, l[3], delta)))
-  ll
-}
 
 f.pq <- function(x, xx, yy, delta, w1, w2, m1, m2, alpha, gamma){
   
@@ -453,6 +446,18 @@ f.pq <- function(x, xx, yy, delta, w1, w2, m1, m2, alpha, gamma){
   p <- sum(w1/ (1 + get[1] * f.w(xx, get[3], 0)))
   q <- sum(w2/ (1 + get[2] * f.w(yy, get[3], delta)))
   return(c(p, q))
+}
+
+
+
+get.est <- function(xsamp, ysamp, w1, w2, delta, m1, m2, l){
+  ll <- numeric(3)
+  ll[1] <- f.lam(xsamp, w1, l[3], 0, l[1])
+  ll[2] <- f.lam(ysamp, w2, l[3], delta, l[2])
+  
+  ll[3] <- m1 * l[1] * sum(w1 /(1 + l[1] * f.w(xsamp, l[3], 0))) +  
+    m2 * l[2] * sum(w2 /(1 + l[2] * f.w(ysamp, l[3], delta)))
+  ll
 }
 
 f.mu <- function(xx, yy, w1, w2, m1, m2, delta, l1, l2, mu){
@@ -627,7 +632,7 @@ EL.stm <- function(x, y, alpha, gamma, level = 0.95, step = 0.1, delta0 = 0, plo
     ci <- c(uniroot(function(d) 2*a*f.ell(x, xx, yy, w1, w2, m1, m2, d, alpha, gamma)  - crit.val, c(lo, delta.return))$root,
             uniroot(function(d) 2*a*f.ell(x, xx, yy, w1, w2, m1, m2, d, alpha, gamma)  - crit.val, c(delta.return, hi))$root)
     
-    # st <- 2*a*f.ell(x, xx, yy, w1, w2, m1, m2, delta0)
+    st <- 2*a*f.ell(x, xx, yy, w1, w2, m1, m2, delta0, alpha, gamma)
     
     pq <- c(f.pq(x, xx, yy, ci[1], w1, w2, m1, m2, alpha, gamma), f.pq(x, xx, yy, ci[2], w1, w2, m1, m2, alpha, gamma))
     names(pq) <- c('p.ci.lb', 'q.ci.lb','p.ci.ub', 'q.ci.ub')
@@ -667,7 +672,7 @@ EL.stm <- function(x, y, alpha, gamma, level = 0.95, step = 0.1, delta0 = 0, plo
   return(list('conf.int' = ci
               # ,'st' = st
               ,'est' = delta.return
-              # ,'p.value' = 1 - pchisq(st, df = 1)
+              ,'p.value' = 1 - pchisq(st, df = 1)
               ,'pq' = pq
               ,'ell.plot' = el
   ))
