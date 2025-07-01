@@ -1,7 +1,3 @@
-## Publication
-
-This directory contains the R code for the publication "Two-sample empirical likelihood method for right censored data" by Pahirko, Valeinis and Jēkabsons
-
 ## File descriptions
 
 * `functions_1.R` contains all functions used for data simulations and examples.
