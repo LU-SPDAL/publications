@@ -191,16 +191,6 @@ MZ_stat_modif <- function(dati_1, dati_2, t_0, alpha, int_red_ = 0) {
 # Pahirko & Valeinis method code
 # ---------------------------------------
 
-posumm <- function(pofit, d = 6) {
-    round(cbind(
-        Est = pofit$beta,
-        SD = sqrt(diag(pofit$vbeta)),
-        lo.ci = pofit$beta - 1.96 * sqrt(diag(pofit$vbeta)),
-        up.ci = pofit$beta + 1.96 * sqrt(diag(pofit$vbeta)),
-        Wald = (pofit$beta / sqrt(diag(pofit$vbeta)))^2,
-        PVal = 2 - 2 * pnorm(abs(pofit$beta / sqrt(diag(pofit$vbeta))))), d)
-}
-
 # KM estimator for censored time distribution G
 g_estimator <- function(t, dati) {           # 1 - G_n
     n <- nrow(dati)
@@ -287,6 +277,16 @@ EL2_est_new <- function(dati1, dati2, t_0 = 0, method = "mean", conf.level = 0.9
 # ------------------------------------------------------------------------------
 # Pseudo values approach
 # ---------------------------------------
+posumm <- function(pofit, d = 6) {
+    round(cbind(
+        Est = pofit$beta,
+        SD = sqrt(diag(pofit$vbeta)),
+        lo.ci = pofit$beta - 1.96 * sqrt(diag(pofit$vbeta)),
+        up.ci = pofit$beta + 1.96 * sqrt(diag(pofit$vbeta)),
+        Wald = (pofit$beta / sqrt(diag(pofit$vbeta)))^2,
+        PVal = 2 - 2 * pnorm(abs(pofit$beta / sqrt(diag(pofit$vbeta))))), d)
+}
+
 PO_SURV <- function(dati1, dati2, t_0) {
     n <- nrow(dati1)
     m <- nrow(dati2)
@@ -718,3 +718,4 @@ transform_n <- function (x, offset_ = 0, custom_cols, custom_col_names) {
     y <- rbind(t, y)
     return(y)
 }
+
