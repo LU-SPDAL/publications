@@ -1,6 +1,9 @@
 library(tidyverse)
 library(rstatix)
 library(PairedData)
+library(EL)
+library(ggpubr)
+library(ggtext)
 source('functions.R')
 
 data0 <- openxlsx::read.xlsx('datu_kopas.xlsx', sheet = 'cloth')
@@ -16,8 +19,10 @@ st <- data1 %>%
   summarise(mean = mean(x),
             tm_005 = mean(x, trim = 0.05),
             tm_01 = mean(x, trim = 0.1),
+            tm_02 = mean(x, trim = 0.2),
             stm_005 = ST_mean(x, alpha = 0.05, gamma = 0.2),
             stm_01 = ST_mean(x, alpha = 0.1, gamma = 0.2),
+            stm_02 = ST_mean(x, alpha = 0.15, gamma = 0.2),
             n = n()) %>% 
   ungroup() %>% 
   mutate(gr = paste(gr, ' (n = ', n, ')', sep = '')) %>% 
@@ -43,32 +48,34 @@ y <- data1 %>%
   unlist()
 
 gamma <- 0.2
-alpha <- c(0.05, 0.1)
+alpha <- c(0.05, 0.1, 0.15)
 
 p.t <- t.test(x, y)$p.value
-p.tm.y <- c(yuen.t.test(x, y, tr = alpha[1])$p.value, yuen.t.test(x, y, tr = alpha[2])$p.value)
+p.el <- EL.means(x, y)$p.value
+p.tm.y <- c(yuen.t.test(x, y, tr = alpha[1])$p.value, yuen.t.test(x, y, tr = alpha[2])$p.value, yuen.t.test(x, y, tr = alpha[3])$p.value)
 
-p.tm.el <- c(EL.tm(x, y, alpha = alpha[1], beta = alpha[1])$p.value, EL.tm(x, y, alpha = alpha[2], beta = alpha[2])$p.value)
+p.tm.el <- c(EL.tm(x, y, alpha = alpha[1], beta = alpha[1])$p.value, EL.tm(x, y, alpha = alpha[2], beta = alpha[2])$p.value, EL.tm(x, y, alpha = alpha[2], beta = alpha[3])$p.value)
 
-p.stm.y <- c(yuen.stm(x, y, alpha = alpha[1], gamma = gamma)$p.value, yuen.stm(x, y, alpha = alpha[2], gamma = gamma)$p.value)
-p.stm.el <- c(EL.stm(x, y, alpha = alpha[1], gamma = gamma)$p.value, EL.stm(x, y, alpha = alpha[2], gamma = gamma)$p.value)
+p.stm.y <- c(yuen.stm(x, y, alpha = alpha[1], gamma = gamma)$p.value, yuen.stm(x, y, alpha = alpha[2], gamma = gamma)$p.value, yuen.stm(x, y, alpha = alpha[3], gamma = gamma)$p.value)
+p.stm.el <- c(EL.stm(x, y, alpha = alpha[1], gamma = gamma)$p.value, EL.stm(x, y, alpha = alpha[2], gamma = gamma)$p.value, EL.stm(x, y, alpha = alpha[3], gamma = gamma)$p.value)
 
-p.tab <- data.frame(est = st$est, p.t = c(p.t, p.tm.y, p.stm.y), p.el = c(NA, p.tm.el, p.stm.el))
+p.tab <- data.frame(est = st$est, p.t = c(p.t, p.tm.y, p.stm.y), p.el = c(p.el, p.tm.el, p.stm.el))
 
 rez <- left_join(st, p.tab)
-openxlsx::write.xlsx(rez, 'p_tab.xlsx', row.names = FALSE)
 
-data1 %>% 
-  ggplot(aes(x = gr, y = x))+
-  geom_boxplot()+
-  theme_minimal()+
-  xlab('')+
-  ylab('Cotton')
 
-ggsave('bp2.png', bg = 'white')
+
+# Y <- list(data1$x[data1$gr == 'Mill_A'], data1$x[data1$gr != 'Mill_A'])
+# 
+# alpha = seq(0.01, 0.45, 0.01)     
+# CV.opt(Y, ST.diff, alpha = alpha, 5, plot = TRUE) # alpha = 0.34; gamma = 0.35
+
+      
+# openxlsx::write.xlsx(rez, 'p_tab.xlsx', row.names = FALSE)
 
 
 ci.t <- t.test(x.2, y.2)$conf.int
+ci.el <- EL.means(x.2, y.2)$conf.int
 
 ci.t.tm <- matrix(ncol = 2, nrow = length(alpha))
 ci.el.tm <- matrix(ncol = 2, nrow = length(alpha))
@@ -78,8 +85,8 @@ ci.el.stm <- matrix(ncol = 2, nrow = length(alpha))
 for(a in 1:length(alpha)){
   ci.t.tm[a, ] <- yuen.tm(x ~ gr, data1, tr = alpha[a])$conf.int
   ci.el.tm[a, ] <- EL.tm(x.2, y.2, alpha = alpha[a], beta = alpha[a])$conf.int
-  ci.t.stm[a, ] <- yuen.stm(x.2, y.2, alpha = alpha[a], gamma = 0.4)$conf.int
-  ci.el.stm[a, ] <- c(-1*EL.stm(x.2, y.2, alpha = alpha[a], gamma = 0.4)$conf.int[2], -1*EL.stm(x.2, y.2, alpha = alpha[a], gamma = 0.4)$conf.int[1])
+  ci.t.stm[a, ] <- yuen.stm(x.2, y.2, alpha = alpha[a], gamma = 0.2)$conf.int
+  ci.el.stm[a, ] <- c(-1*EL.stm(x.2, y.2, alpha = alpha[a], gamma = 0.2)$conf.int[2], -1*EL.stm(x.2, y.2, alpha = alpha[a], gamma = 0.2)$conf.int[1])
 }
 
 d.t.tm <- numeric(length(alpha))
@@ -105,10 +112,10 @@ names(ci.el.tm) <- c('lb', 'ub', 'alpha')
 names(ci.t.stm) <- c('lb', 'ub', 'alpha')
 names(ci.el.stm) <- c('lb', 'ub', 'alpha')
 
-ci.t.tm$method <- c('T_TM', 'T_TM')
-ci.el.tm$method <- c('EL_TM', 'EL_TM')
-ci.t.stm$method <- c('T_ST', 'T_ST')
-ci.el.stm$method <- c('EL_ST', 'EL_ST')
+ci.t.tm$method <- rep('T_TM', length(alpha))
+ci.el.tm$method <- rep('EL_TM', length(alpha))
+ci.t.stm$method <- rep('T_ST', length(alpha))
+ci.el.stm$method <- rep('EL_ST', length(alpha))
 
 d.t.tm <- as.data.frame(cbind(d.t.tm, alpha))
 d.el.tm <- as.data.frame(cbind(d.el.tm, alpha))
@@ -120,13 +127,16 @@ names(d.el.tm) <- c('est', 'alpha')
 names(d.t.stm) <- c('est', 'alpha')
 names(d.el.stm) <- c('est', 'alpha')
 
-d.t.tm$method <- c('T_TM', 'T_TM')
-d.el.tm$method <- c('EL_TM', 'EL_TM')
-d.t.stm$method <- c('T_ST', 'T_ST')
-d.el.stm$method <- c('EL_ST', 'EL_ST')
+
+d.t.tm$method <- rep('T_TM', length(alpha))
+d.el.tm$method <- rep('EL_TM', length(alpha))
+d.t.stm$method <- rep('T_ST', length(alpha))
+d.el.stm$method <- rep('EL_ST', length(alpha))
 
 
-ci.tab <- rbind(data.frame('lb' = ci.t[1], 'ub' = ci.t[2], est = mean(x.2) - mean(y.2), alpha = NA, method = 'T'),
+
+ci.tab <- rbind(data.frame('lb' = ci.t[1], 'ub' = ci.t[2], est = mean(x.2) - mean(y.2), alpha = 0, method = 'T'),
+                data.frame('lb' = ci.el[1], 'ub' = ci.el[2], est = EL.means(x.2, y.2)$est, alpha = 0, method = 'EL'),
                 left_join(ci.t.tm, d.t.tm),
                 left_join(ci.el.tm, d.el.tm),
                 left_join(ci.t.stm, d.t.stm),
@@ -137,25 +147,26 @@ ci.tab <- rbind(data.frame('lb' = ci.t[1], 'ub' = ci.t[2], est = mean(x.2) - mea
 ci.tab %>%
   mutate(alpha = as.character(alpha)) %>% 
   ggplot(aes(x = method, y = est))+
-  geom_point(aes(col = alpha), size = 3.75, position = position_dodge(width = 0.5))+
-  geom_errorbar(aes(ymin = lb, ymax = ub, col = alpha), width=.1, size = 1.2, position = position_dodge(width = 0.5))+
-  geom_hline(yintercept = 0, col = 'red', size = 1, lty = 2)+
-  theme_minimal()+
-  ylab(expression(Delta))
+  geom_point(aes(shape = alpha), size = 3.75, position = position_dodge(width = 0.5))+
+  geom_errorbar(aes(ymin = lb, ymax = ub, lty = alpha), width=.1, size = 1.2, position = position_dodge(width = 0.5))+
+  geom_hline(yintercept = 0, col = 'black', size = 1, lty = 2)+
+  theme_bw()+
+  ylab(expression(Delta))+
+  scale_x_discrete(limits = c('EL_ST', 'EL_TM', 'EL', 'T', 'T_ST', 'T_TM'))
 
-ggsave('ci_exmp.png', bg = 'white')
+
+# ggsave('ci_exmp.png', bg = 'white')
 
 data0 %>% 
   pivot_longer(cols = 1:2) %>% 
   ggplot(aes(x = name, y = value))+
   geom_boxplot()+
-  theme_minimal()+
+  theme_bw()+
   xlab('group')+
   ylab('Cloth')
 
+ggsave('bp2.png')
 
-
-# ggsave('hist.png', bg = 'white')
 
 
 # 3 samp ----
@@ -169,7 +180,7 @@ OsloTransect <- OsloTransect %>%
 OsloTransect$X.FLITHO <- as.character(OsloTransect$X.FLITHO)
 
 OsloTransect <- OsloTransect %>% 
-  select( FILTHO = X.FLITHO , Ag_ppb,  B,    Ba,    Ca,   Cd,   Co,  Cr,   Cu,  Fe, Hg_ppb,     
+  dplyr::select( FILTHO = X.FLITHO , Ag_ppb,  B,    Ba,    Ca,   Cd,   Co,  Cr,   Cu,  Fe, Hg_ppb,     
           K   ,La  ,Mg   ,Mn   ,Mo   ,Ni    ,P ,Pb    ,S   ,Sb    ,Sr ,Ti    ,Zn) %>% 
   na.omit()
 
@@ -361,7 +372,7 @@ Zn <- OsloTransect %>%
 
 
 # names(OsloTransect)
-ggpubr::ggarrange(Ag, B, Ba, Ca, Cd, Co, Cu, Fe, Hg, K, La, nrow = 4, ncol = 3)
+ggpubr::ggarrange(Ag, B, Ba, Ca, Cd, Co, Cu, Fe, Hg, K, La,  nrow = 4, ncol = 3)
 # ggsave('bp_anova1.png', width = 10, bg = 'white')
 
 ggpubr::ggarrange(Mg, Mn, Mo, Ni, P, Pb, S, Sb, Sr, Ti, Zn, nrow = 4, ncol = 3)
@@ -883,4 +894,213 @@ tab.anova <- left_join(welch_p,
                                            left_join(ely_p, 
                                                      left_join(stm_p, stm_y_p)))))
 
+f.temp <- function(elem, alpha = seq(0.01, 0.45, 0.01), K){
+  # elem <- nam[1]
+  Y <- OsloTransect %>%
+    dplyr::select(FILTHO, x = elem) %>% 
+    group_by(FILTHO) %>%
+    summarise(B = list(x), .groups = "drop") %>%
+    tibble::deframe() 
+    
+  CV.opt(Y, common.stm, alpha, K)$optimal.values[2:3]
+  # CV.opt(Y, common.stm, alpha, K)
+   
+}
+
+nam <- names(OsloTransect)[-1]
+rez <- t(sapply(nam, function(x) f.temp(x, alpha = seq(0.01, 0.3, 0.01), 10)))
+
+rez2 <- as.data.frame(rez) %>% 
+  mutate(Element = row.names(rez),
+         alpha = as.numeric(alpha),
+         gamma = as.numeric(gamma))
+
+rez2 %>% 
+  dplyr::select(Element, alpha, gamma) %>% 
+  openxlsx::write.xlsx('opt_ag.xlsx')
+
+f.temp2 <- function(elem, alpha, gamma, method){
+  # elem <- "Ag_ppb"
+  Y <- OsloTransect %>%
+    dplyr::select(FILTHO, x = elem) %>% 
+    group_by(FILTHO) %>%
+    summarise(B = list(x), .groups = "drop") %>%
+    tibble::deframe() 
+  
+  if(method == 'EL'){
+    EL.anova.stm(Y, alpha, gamma)$p.value
+  }else if (method == 'F'){
+    ANOVA.stm(Y, alpha, gamma)$p.value
+  }
+  
+}
+
+
+p.anova.stm.opt <- data.frame(p_y = sapply(1:nrow(rez2), function(i) f.temp2(rez2$Element[i], rez2$alpha[i], rez2$gamma[i], 'F')),
+           p_el = sapply(1:nrow(rez2), function(i) f.temp2(rez2$Element[i], rez2$alpha[i], rez2$gamma[i], 'EL')))
+openxlsx::write.xlsx(p.anova.stm.opt, 'opt_p.xlsx', row.names = F)
+cbind(tab.anova, p.anova.stm.opt)
 # openxlsx::write.xlsx(tab.anova, 'elem.xlsx')
+
+
+oslo.camsed <- OsloTransect %>% 
+  filter(FILTHO == 'CAMSED') %>% 
+  dplyr::select(La)
+
+
+tm005.1 <- quantile(oslo.camsed$La, probs = 0.95)
+tm01.1 <- quantile(oslo.camsed$La, probs = 0.90)
+tm02.1 <- quantile(oslo.camsed$La, probs = 0.8)
+bw.1 <- round(1/bw.nrd(oslo.camsed$La))
+
+
+camsed <- oslo.camsed %>% 
+  ggplot(aes(x = La))+
+  geom_histogram(aes(y = ..density..), bins = bw.1, col = 'black', fill = 'white')+
+  geom_vline(aes(xintercept = tm005.1, linetype = '0.05'), size = 1.3)+
+  geom_vline(aes(xintercept = tm01.1, linetype = '0.1'), size = 1.3)+
+  geom_vline(aes(xintercept = tm02.1, linetype = '0.2'), size = 1.3)+
+  theme_bw()+
+  labs(linetype = expression(alpha),
+       x = '',
+       y = '')+
+  scale_color_brewer(palette = "Dark2")+
+  ggtitle("CAMSED") +
+  theme(
+    plot.title = element_textbox(
+      size = 9,
+      face = "bold",
+      color = "black",
+      fill = "grey90",# similar to default facet strip
+      box.color = "grey70",
+      # box.size = 0.5,
+      padding = margin(4, 4, 4, 4),
+      margin = margin(6, 0, 6, 0)
+    )
+  )
+
+
+
+
+oslo.geneis_o <- OsloTransect %>% 
+  filter(FILTHO == 'GNEIS_O') %>% 
+  dplyr::select(La)
+
+
+tm005.2 <- quantile(oslo.geneis_o$La, probs = 0.95)
+tm01.2 <- quantile(oslo.geneis_o$La, probs = 0.90)
+tm02.2 <- quantile(oslo.geneis_o$La, probs = 0.8)
+bw.2 <- round(1/bw.nrd(oslo.geneis_o$La))
+
+
+gneis_o <- oslo.geneis_o %>% 
+  ggplot(aes(x = La))+
+  geom_histogram(aes(y = ..density..), bins = bw.2, col = 'black', fill = 'white')+
+  geom_vline(aes(xintercept = tm005.2, linetype = '0.05'), size = 1.3)+
+  geom_vline(aes(xintercept = tm01.2, linetype = '0.1'), size = 1.3)+
+  geom_vline(aes(xintercept = tm02.2, linetype = '0.2'), size = 1.3)+
+  theme_bw()+
+  labs(linetype = expression(alpha),
+       x = '',
+       y = '')+
+  scale_color_brewer(palette = "Dark2")+
+  ggtitle("GNEIS_O") +
+  theme(
+    plot.title = element_textbox(
+      size = 9,
+      face = "bold",
+      color = "black",
+      fill = "grey90",# similar to default facet strip
+      box.color = "grey70",
+      # box.size = 0.5,
+      padding = margin(4, 4, 4, 4),
+      margin = margin(6, 0, 6, 0)
+    )
+  )
+
+oslo.geneis_r <- OsloTransect %>% 
+  filter(FILTHO == 'GNEIS_R') %>% 
+  dplyr::select(La)
+
+
+tm005.3 <- quantile(oslo.geneis_r$La, probs = 0.95)
+tm01.3 <- quantile(oslo.geneis_r$La, probs = 0.90)
+tm02.3 <- quantile(oslo.geneis_r$La, probs = 0.8)
+bw.3 <- round(1/bw.nrd(oslo.geneis_o$La))
+
+
+gneis_r <- oslo.geneis_r %>% 
+  ggplot(aes(x = La))+
+  geom_histogram(aes(y = ..density..), bins = bw.3, col = 'black', fill = 'white')+
+  geom_vline(aes(xintercept = tm005.3, linetype = '0.05'), size = 1.3)+
+  geom_vline(aes(xintercept = tm01.3, linetype = '0.1'), size = 1.3)+
+  geom_vline(aes(xintercept = tm02.3, linetype = '0.2'), size = 1.3)+
+  theme_bw()+
+  labs(linetype = expression(alpha),
+       x = '',
+       y = '')+
+  scale_color_brewer(palette = "Dark2")+
+  ggtitle("GNEIS_R") +
+  theme(
+    plot.title = element_textbox(
+      size = 9,
+      face = "bold",
+      color = "black",
+      fill = "grey90",# similar to default facet strip
+      box.color = "grey70",
+      # box.size = 0.5,
+      padding = margin(4, 4, 4, 4),
+      margin = margin(6, 0, 6, 0)
+    )
+  )
+
+oslo.magm <- OsloTransect %>% 
+  filter(FILTHO == 'MAGM') %>% 
+  dplyr::select(La)
+
+
+tm005.4 <- quantile(oslo.magm$La, probs = 0.95)
+tm01.4 <- quantile(oslo.magm$La, probs = 0.90)
+tm02.4 <- quantile(oslo.magm$La, probs = 0.8)
+bw.4 <- round(1/bw.nrd(oslo.magm$La))
+
+
+magm <- oslo.magm %>% 
+  ggplot(aes(x = La))+
+  geom_histogram(aes(y = ..density..), bins = bw.4, col = 'black', fill = 'white')+
+  geom_vline(aes(xintercept = tm005.4, linetype = '0.05'), size = 1.3)+
+  geom_vline(aes(xintercept = tm01.4, linetype = '0.1'), size = 1.3)+
+  geom_vline(aes(xintercept = tm02.4, linetype = '0.2'), size = 1.3)+
+  theme_bw()+
+  labs(linetype = expression(alpha),
+      x = '',
+       y = '')+
+  scale_color_brewer(palette = "Dark2")+
+  ggtitle("MAGM") +
+  theme(
+    plot.title = element_textbox(
+      size = 9,
+      face = "bold",
+      color = "black",
+      fill = "grey90",# similar to default facet strip
+      box.color = "grey70",
+      # box.size = 0.5,
+      padding = margin(4, 4, 4, 4),
+      margin = margin(6, 0, 6, 0)
+    )
+  )
+
+
+
+ggarrange(camsed, gneis_o, gneis_r, magm, common.legend = TRUE, legend = 'bottom', ncol = 2, nrow = 2) %>%
+  annotate_figure(
+    left = text_grob("Density", rot = 90, vjust = 1, size = 12),
+    bottom = text_grob("La", size = 12)
+  )
+
+# ggsave('la_hist.png', bg = 'white', width = 10)
+# 
+
+
+
+
