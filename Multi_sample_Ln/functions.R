@@ -1,6 +1,7 @@
 library(tidyr)
 library(WRS2)
 library(nleqslv)
+library(scatterplot3d)
 
 coverage <- function(mu, lb, ub){
   if(is.na(lb)|is.na(ub)){
@@ -90,10 +91,12 @@ ST_mean    <- function(data, alpha, gamma) {
 
 stmeanvar.asym  <- function(data, alpha, gamma) {
   
+  # data <- x
   data_sort <- sort(data)
   n <- length(data)
   r  <- floor(alpha*n)
-  m  <- floor(gamma*n)
+  m  <- floor(gamma*n) + 1
+  
   
   weights <- sapply(seq(1:n)/(n+1), J_fun, alpha, gamma)
   const <- n/sum(weights)
@@ -101,44 +104,87 @@ stmeanvar.asym  <- function(data, alpha, gamma) {
   if (alpha >= gamma) NA
   else {
     
-    c <- 1/(m-r)*((m + m*r/n - r - m^2/n)*data_sort[m+1] - (1 + r/n)*sum(data_sort[(r+1):m]) + 
-                    2/n*sum(data_sort[(r+1):m]*((r+1):m)) + (2-r/n)*sum(data_sort[(n-m+1):(n-r)]) + 
-                    (r*m - m^2)/n*data_sort[n-m] - 2/n*sum(data_sort[(n-m+1):(n-r)]*((n-m+1):(n-r)))) +
-      1/n*(sum(data_sort[(m+1):(n-m)]) + m*data_sort[n-m] + (m-n)*data_sort[m+1])
+    ## safe index sets
+    idx_rm <- if (m == 0) integer(0) else if (r == 0) 1:m else (r+1):m
+    idx_nm_nr <- if (m == 0) integer(0) else if (r == 0) (n-m+1):n else (n-m+1):(n-r)
     
-    infl <- c()
+    ## safe order stats
+    Xm1 <- if (m == 0) data_sort[1] else data_sort[m+1]
+    Xnm <- if (m == 0) data_sort[n] else data_sort[n-m]
     
-    for (i in 1:length(data)){
+    c <- if (m == 0) {
+      0
+    } else {
+      1/(m-r)*(
+        (m + m*r/n - r - m^2/n)*Xm1 -
+          (1 + r/n)*sum(data_sort[idx_rm]) +
+          2/n*sum(data_sort[idx_rm]*idx_rm) +
+          (2-r/n)*sum(data_sort[idx_nm_nr]) +
+          (r*m - m^2)/n*Xnm -
+          2/n*sum(data_sort[idx_nm_nr]*idx_nm_nr)
+      ) +
+        1/n*(sum(data_sort[(m+1):(n-m)]) + m*Xnm + (m-n)*Xm1)
+    }
+    
+    infl <- numeric(n)
+    
+    for (i in 1:n){
       
       x <- data_sort[i]
       
-      if (data_sort[i] <= data_sort[r]){
+      left_r <- if (r == 0) -Inf else data_sort[r]
+      mid_m  <- if (m == 0) -Inf else data_sort[m]
+      right_m <- if (m == 0) Inf else data_sort[n-m]
+      right_r <- if (r == 0) Inf else data_sort[n-r]
+      
+      if (x <= left_r){
         
         infl[i] <- -c
         
-      } else if ((data_sort[i] > data_sort[r]) & (data_sort[i] <= data_sort[m])){
+      } else if (x > left_r && x <= mid_m){
         
-        infl[i] <- 1/(m-r)*((i-r)*x - sum(data_sort[(r+1):i])) - c
+        infl[i] <- if (m == 0) {
+          x - c
+        } else {
+          1/(m-r)*((i-r)*x - sum(data_sort[if (r==0) 1:i else (r+1):i])) - c
+        }
         
-      } else if ((data_sort[i] > data_sort[m]) & (data_sort[i] <= data_sort[n-m])) {
+      } else if (x > mid_m && x <= right_m) {
         
-        infl[i] <- 1/(m-r)*((m-r)*data_sort[m+1] - sum(data_sort[(r+1):m])) + x - data_sort[m+1] -c
+        infl[i] <- if (m == 0) {
+          x - c
+        } else {
+          1/(m-r)*((m-r)*Xm1 - sum(data_sort[idx_rm])) +
+            x - Xm1 - c
+        }
         
-      } else if ((data_sort[i] > data_sort[n-m]) & (data_sort[i] <= data_sort[n-r])) {
+      } else if (x > right_m && x <= right_r) {
         
-        infl[i] <- 1/(m-r)*((m-r)*data_sort[m+1] - sum(data_sort[(r+1):m])) + data_sort[n-m] - data_sort[m+1] +
-          1/(m-r)*((n-r)*x + (r-m)*data_sort[n-m] - i*x + sum(data_sort[(n-m+1):i])) - c
+        infl[i] <- if (m == 0) {
+          x - c
+        } else {
+          1/(m-r)*((m-r)*Xm1 - sum(data_sort[idx_rm])) +
+            Xnm - Xm1 +
+            1/(m-r)*((n-r)*x + (r-m)*Xnm -
+                       i*x + sum(data_sort[(n-m+1):i])) - c
+        }
         
-      } else if(data_sort[i] > data_sort[n-r]){
+      } else {
         
-        infl[i] <- 1/(m-r)*((m-r)*data_sort[m+1] - sum(data_sort[(r+1):m])) + data_sort[n-m] - data_sort[m+1] +
-          1/(m-r)*((r-m)*data_sort[n-m] + sum(data_sort[(n-m+1):(n-r)])) - c
+        infl[i] <- if (m == 0) {
+          x - c
+        } else {
+          1/(m-r)*((m-r)*Xm1 - sum(data_sort[idx_rm])) +
+            Xnm - Xm1 +
+            1/(m-r)*((r-m)*Xnm + sum(data_sort[idx_nm_nr])) - c
+        }
       }
     }
     
     sum(infl^2)*const^2/n^2
   }
 }
+
 # ST_mean(rnorm(100), 0.05, 0.1)
 emp.lik.stmean <- function(mu, data, alpha, gamma) {
   
@@ -409,14 +455,13 @@ yuen.stm <- function(x, y, alpha = 0.1, gamma = 0.1){
     (var.x^2/df1+
        var.y^2/df2)
   
-  p <- pt(t, df)
   
   ci <- c(delta - qt(p = 0.975, df = df)*se, delta + qt(p = 0.975, df = df)*se)
   return(list('st' = t,
               'df' = df,
               'conf.int' = ci,
               'estimate' = -1*delta,
-              'p.value' = p))
+              'p.value' = pt(t, df)))
 }
 
 
@@ -428,6 +473,15 @@ f.lam <- function(x, w,  mu, delta, lam){
   sum(w * f.w(x, mu, delta) / (1 + lam * f.w(x, mu, delta)))
 }
 
+get.est <- function(xsamp, ysamp, w1, w2, delta, m1, m2, l){
+  ll <- numeric(3)
+  ll[1] <- f.lam(xsamp, w1, l[3], 0, l[1])
+  ll[2] <- f.lam(ysamp, w2, l[3], delta, l[2])
+  
+  ll[3] <- m1 * l[1] * sum(w1 /(1 + l[1] * f.w(xsamp, l[3], 0))) +  
+    m2 * l[2] * sum(w2 /(1 + l[2] * f.w(ysamp, l[3], delta)))
+  ll
+}
 
 f.pq <- function(x, xx, yy, delta, w1, w2, m1, m2, alpha, gamma){
   
@@ -446,18 +500,6 @@ f.pq <- function(x, xx, yy, delta, w1, w2, m1, m2, alpha, gamma){
   p <- sum(w1/ (1 + get[1] * f.w(xx, get[3], 0)))
   q <- sum(w2/ (1 + get[2] * f.w(yy, get[3], delta)))
   return(c(p, q))
-}
-
-
-
-get.est <- function(xsamp, ysamp, w1, w2, delta, m1, m2, l){
-  ll <- numeric(3)
-  ll[1] <- f.lam(xsamp, w1, l[3], 0, l[1])
-  ll[2] <- f.lam(ysamp, w2, l[3], delta, l[2])
-  
-  ll[3] <- m1 * l[1] * sum(w1 /(1 + l[1] * f.w(xsamp, l[3], 0))) +  
-    m2 * l[2] * sum(w2 /(1 + l[2] * f.w(ysamp, l[3], delta)))
-  ll
 }
 
 f.mu <- function(xx, yy, w1, w2, m1, m2, delta, l1, l2, mu){
@@ -663,14 +705,8 @@ EL.stm <- function(x, y, alpha, gamma, level = 0.95, step = 0.1, delta0 = 0, plo
     el = 'EL plot not returned'
   }
   
-  # eq.draw(x, y, alpha, gamma, lo)
-  # f.ell(x, xx, yy, w1, w2, m1, m2, -4)
-  # return(list('conf.int' = ci
-  #             ,'par_lb' = f.ell2(x, xx, yy, w1, w2, m1, m2, ci[1])$par
-  #             ,'par_ub' = f.ell2(x, xx, yy, w1, w2, m1, m2, ci[2])$par
-  # ))
   return(list('conf.int' = ci
-              # ,'st' = st
+              ,'st' = st
               ,'est' = delta.return
               ,'p.value' = 1 - pchisq(st, df = 1)
               ,'pq' = pq
@@ -826,6 +862,77 @@ EL.anova<-function(w)
   return(rez)
 }
 
+# Sensitivity analysis ----
+
+
+ST.diff <- function(Y, alpha, gamma){
+  return(ST_mean(Y[[2]], alpha, gamma) - ST_mean(Y[[1]], alpha, gamma))
+}
+
+common.stm <- function(Y, alpha, gamma){
+  k<-length(Y)
+  stm <-unlist(lapply(Y, function(x) ST_mean(x, alpha, gamma)))
+  d <- unlist(lapply(Y, function(x) stmeanvar.asym(x, alpha, gamma)))
+  
+  wj.1 <- 1/d
+  w.1 <- sum(wj.1)
+  sum(wj.1 * stm)/w.1
+}
+
+CV.st <- function(Y, FUN, alpha, gamma, K, seed){
+  n <- lengths(Y)
+  
+  set.seed(seed)
+  Y <- lapply(Y, function(x) sample(x))
+  KK <- lapply(n, function(x) split(1:x, cut(seq_along(1:x), K, labels = FALSE)))
+  
+  mean(sapply(1:K, function(i){
+    
+    YY1 <- lapply(1:length(Y), function(n) {Y[[n]][KK[[n]][[i]]]})
+    YY2 <- lapply(1:length(Y), function(n) {Y[[n]][-KK[[n]][[i]]]})
+    (FUN(YY1, alpha, gamma) - FUN(YY2, alpha, gamma))^2
+  }))
+  
+}
+
+
+CV.opt <- function(Y, FUN, alpha, K, seed = 123, plot = FALSE){
+  
+  gamma <- c(alpha[alpha != min(alpha)], max(alpha) + 0.01)
+  rez.table <- na.omit(bind_rows(sapply(1:length(alpha), function(i) {
+    data.frame(
+      'CV' = sapply(gamma[gamma > alpha[i]], function(g) CV.st(Y, FUN, alpha = alpha[i], gamma = g, K = K, seed = seed) ),
+      'alpha' = alpha[i],
+      'gamma' = gamma[gamma > alpha[i]])
+  }, simplify = F)
+  ))
+  
+  if(plot == TRUE){
+    
+    colors <- rep('black', nrow(rez.table))
+    colors[which.min(rez.table$CV)] <- 'red'
+    
+    scatterplot3d(
+      rez.table$alpha, rez.table$gamma, rez.table$CV,
+      pch = 19,            # solid dots
+      main = "",
+      xlab = expression(alpha), ylab = expression(gamma), zlab = 'CV',
+      color = colors,
+      angle = 30,          # camera angle
+      grid = TRUE, box = TRUE
+    )
+    g <- 'plot returned'
+    
+  }else{
+    g <- 'No plot returned'
+  }
+  
+  
+  return(list('results.table' = rez.table,
+              'optimal.values' = rez.table[rez.table$CV == min(rez.table$CV),],
+              'plot' = g))
+  
+}
 
 
 
