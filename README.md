@@ -5,3 +5,4 @@ This GitHub repository is used to provide supplementary materials for SPDAL team
 * [Change-point analysis using two-sample empirical likelihood method](https://doi.org/10.1080/02664763.2025.2543051) (folder: CP_EL_2SAMP)
 * [Empirical likelihood inference for L-estimators](http://dx.doi.org/10.1080/03610926.2026.2641782) (folder: Multi_sample_Ln)
 * [Two-sample empirical likelihood method for right censored data](https://doi.org/10.1515/ijb-2024-0120) (folder: 2SAMP_EL_SURV)
+* [Testing Equality of Autocorrelation Coefficients in Two Independent Time Series Using Empirical Likelihood](https://doi.org/10.3390/math14122090) (folder: 2SMPL_ACF_EL_DEP)
