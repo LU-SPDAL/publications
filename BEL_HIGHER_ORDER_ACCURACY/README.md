@@ -19,7 +19,6 @@ run_all.R          runs the complete numerical study
 redraw_figures.R   redraws Figures 1 and 2 from the Excel workbook
 ```
 
-The archive contains no RDS files. Numerical results are supplied in two Excel workbooks.
 
 ## Result workbooks
 
