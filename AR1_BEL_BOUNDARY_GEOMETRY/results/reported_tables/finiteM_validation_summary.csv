@@ -1,0 +1,2 @@
+method_level_comparisons,mean_abs_rejection_difference,median_abs_rejection_difference,max_abs_rejection_difference,mean_abs_hull_difference,max_abs_hull_difference,reps_per_finite_law,reps_per_limit_law
+576,0.0025,0.0019,0.0117,0.00026,0.0035,10000,10000

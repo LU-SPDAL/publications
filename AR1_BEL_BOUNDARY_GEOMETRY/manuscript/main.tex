@@ -1,0 +1,1117 @@
+\documentclass[12pt]{article}
+
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{amsmath,amssymb,amsfonts,amsthm,mathtools}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage[authoryear,round]{natbib}
+\usepackage[hidelinks]{hyperref}
+
+\allowdisplaybreaks
+\setlength{\emergencystretch}{2em}
+\setlength{\parindent}{1.5em}
+\setlength{\parskip}{0pt}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{2}
+
+% Allow large figures to remain top floats on ordinary text pages rather than
+% being moved to vertically centered float-only pages.
+\setcounter{topnumber}{2}
+\setcounter{bottomnumber}{1}
+\setcounter{totalnumber}{3}
+\renewcommand{\topfraction}{0.95}
+\renewcommand{\bottomfraction}{0.80}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\floatpagefraction}{0.85}
+\setlength{\textfloatsep}{14pt plus 2pt minus 4pt}
+\setlength{\floatsep}{12pt plus 2pt minus 2pt}
+
+% Equations retain one consecutive numbering sequence throughout the manuscript.
+\renewcommand{\theequation}{\arabic{equation}}
+
+% Theorem environments used in the manuscript.
+\newtheorem{Theorem}{Theorem}[section]
+\newtheorem{Proposition}[Theorem]{Proposition}
+\newtheorem{Corollary}[Theorem]{Corollary}
+\newtheorem{Lemma}[Theorem]{Lemma}
+\newtheorem{Condition}[Theorem]{Condition}
+\theoremstyle{remark}
+\newtheorem{Remark}[Theorem]{Remark}
+
+\title{Block-Scale Persistence and Block Count in Blockwise Empirical Likelihood for a First-Order Autoregression}
+\author{Reinis Alksnis and Janis Valeinis\\[0.5ex]
+\small Laboratory of Statistical Research and Data Analysis, Department of Mathematics,\\
+\small Faculty of Science and Technology, University of Latvia,\\
+\small Jelgavas Street 3, LV-1004 Riga, Latvia\\[0.5ex]
+\small Reinis Alksnis \texttt{reinis.alksnis@lu.lv} \quad Janis Valeinis \texttt{janis.valeinis@lu.lv}\\[0.5ex]
+\small Corresponding author Reinis Alksnis}
+\date{}
+
+% Suggested SJS running headline, under 40 characters
+% Boundary geometry of blockwise EL
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+In blockwise empirical likelihood, the block length controls both the amount of dependence represented within a block and the number of block observations available to empirical likelihood. We study this trade-off for the stationary first-order autoregression using the coordinates $x=M(1-|\phi|)$ and $Q=N/M$. They generate the usual Wilks regime, finite-block-count limits, and local stability-boundary limits. Near a boundary, raw BEL can have a scaled or non-Wilks limit. Exact variance calibration restores first-order chi-squared calibration when $Q\to\infty$, while fixed $Q$ leads to an explicit finite-dimensional Gaussian empirical-likelihood law. Near $-1$, the limit also depends on parity. We also give a finite-$M$ Bartlett refinement in the stable interior and illustrate the resulting geometry through simulations and monthly VIX data.
+\end{abstract}
+
+\noindent\textbf{Keywords} autoregression, block-scale persistence, blockwise empirical likelihood, boundary asymptotics, fixed-$b$ asymptotics, higher-order inference, variance calibration
+
+\smallskip
+\noindent\textbf{Running headline} Block-scale persistence and block count
+
+\section{Introduction}
+Empirical likelihood gives likelihood-ratio inference without a fully specified parametric model \citep{Owen:1988,Owen:2001}. For dependent data, ordinary empirical likelihood does not generally reproduce the long-run variance relevant for inference. \citet{Kitamura:1997} addressed this by applying empirical likelihood to blocks of adjacent observations. In nonoverlapping blockwise empirical likelihood (BEL), the block length $M$ has a dual role. Larger blocks represent more of the dependence structure, but they leave fewer empirical-likelihood observations, $Q=N/M$.
+
+A related weak-dependence preprint \citep{Alksnis.Valeinis:2026} studies this stable-interior trade-off in general form. The present paper asks what happens when persistence itself approaches an AR(1) stability boundary. Near $+1$ and $-1$ we use, respectively,
+\[
+x_+=M(1-\phi),
+\qquad
+x_-=M(1+\phi),
+\qquad
+Q=\frac{N}{M},
+\]
+and write $x=M(1-|\phi|)$ when the sign is not important. Under the local sequence $\phi_M=1-x/M$,
+\[
+\phi_M^M=\left(1-\frac{x}{M}\right)^M\longrightarrow e^{-x},
+\]
+so $x$ measures block length relative to the persistence scale, while $Q$ records the number of observations available to empirical likelihood.
+
+Table~\ref{tab:four-regimes} summarizes the resulting geometry.
+\begin{table}[htbp]
+\centering
+\caption{The two-coordinate asymptotic geometry. The sign-specific local coordinate is $x=M(1-\phi)$ near $+1$ and $x=M(1+\phi)$ near $-1$. Gaussian vectors in the boundary limits arise asymptotically and do not require Gaussian innovations.}
+\label{tab:four-regimes}
+\small
+\begin{tabular}{p{0.24\textwidth}p{0.34\textwidth}p{0.34\textwidth}}
+\toprule
+ & $Q\to\infty$ & $Q$ fixed \\
+\midrule
+$x\to\infty$
+& Classical BEL with the Wilks limit $\chi_1^2$.
+& Interior finite-$Q$ benchmark with limit $\mathcal E_Q(Z_1,\ldots,Z_Q)$ for independent standard Gaussian variables. \\
+\addlinespace
+$x\to x_0\in(0,\infty)$
+& Local-boundary many-block regime. Raw BEL is scaled and exact variance calibration restores $\chi_1^2$.
+& Local-boundary finite-$Q$ regime. The limit is an $x$-dependent Gaussian empirical-likelihood functional, with parity effects near $-1$. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The fixed-$Q$ cells are related to fixed-$b$ reasoning because $M/N=1/Q$, but the limiting objects differ from the overlapping-block Brownian functionals in \citet{Zhang.Shao:2014}. Here only $Q$ nonoverlapping empirical-likelihood observations remain, which produces a finite-dimensional limit. The local-boundary cells add a second feature because the AR coefficient itself changes with $M$. Near $+1$ this is a local-to-unity experiment \citep{Phillips:1987}. Near $-1$ the series almost alternates in sign, which makes block and sample parity visible in the limit. Related empirical-likelihood work on stable and unstable autoregressions targets autoregressive parameters rather than the process mean \citep{Chuang.Chan:2002}. Parametric Bartlett corrections for stable autoregressive likelihoods are studied by \citet{Giersbergen:2009,Giersbergen:2013}.
+
+The paper makes three AR(1)-specific contributions. First, the block-to-sample variance ratio is available exactly and its dependence on persistence can be analyzed directly. Second, the four $(x,Q)$ regimes yield explicit first-order reference laws, including a finite-$Q$ local-boundary law and a parity split near $-1$. Third, away from the boundary we give a finite-$M$ Bartlett refinement based on the exact block covariance structure and innovation skewness and kurtosis. The general stable-interior signed-root expansion is related to \citet{Alksnis.Valeinis:2026}, while the boundary results and exact AR(1) formulas are developed here.
+
+Higher-order empirical-likelihood theory supplies the interior background. Bartlett correction for independent empirical likelihood was studied by \citet{Hall.LaScala:1990} and \citet{DiCiccio.etal:1991}. For dependent data, \citet{Kitamura:1997} established Bartlett correctability for BEL, while \citet{Wang.Polonik:2019} developed a high-order adjusted blockwise construction. A separate frequency-domain literature includes \citet{Monti:1997,Chan.Liu:2010,Yau:2012,Chan.Chen.Yau:2014,Chen.etal:2016}. In the present time-domain setting, variance calibration and Bartlett correction address different errors and can be applied separately or jointly.
+
+For observed data, changing $M$ traces a path through the $(x,Q)$ plane. A highly persistent sample may have no block length for which both coordinates are large. We use this path as a diagnostic description, not as an automatic selector. The simulations therefore start from a rectangular $(x,Q)$ grid and then check the finite-$M$ approximation. The VIX illustration follows the observed block path and compares chi-squared and finite-$Q$ reference laws where appropriate.
+
+Section~2 develops the population theory and boundary regimes. Section~3 treats feasible stable-interior correction and AR(1) working-model robustness. Section~4 reports the simulations, Section~5 gives the VIX illustration, and Section~6 concludes. Technical derivations and additional numerical results are in the Supplementary Material.
+
+\section{BEL Calibration Across Persistence and Block-Count Regimes}
+\label{sec:model-and-calibration}
+
+\subsection{Model and blockwise empirical likelihood}
+
+We use the standard definitions of stationarity, autocovariance, and causal ARMA representation in \citet{Brockwell.Davis:1991}. We consider the stationary first-order autoregressive model
+\begin{equation}
+X_t-\mu=\phi(X_{t-1}-\mu)+\varepsilon_t,
+\qquad |\phi|<1,
+\label{eq:ar1}
+\end{equation}
+where $\{\varepsilon_t\}$ are independent and identically distributed with
+$\operatorname{E}(\varepsilon_t)=0$ and
+$\operatorname{Var}(\varepsilon_t)=\sigma_\varepsilon^2\in(0,\infty)$.
+Under $|\phi|<1$, the process has the causal representation
+\[
+X_t-\mu=\sum_{j=0}^{\infty}\phi^j\varepsilon_{t-j}.
+\]
+This representation will be useful below because it allows the block moments
+and higher-order correction terms to be written directly in terms of the
+innovation distribution. To describe the non-Gaussian part of the correction,
+we use the standardized innovation skewness and excess kurtosis
+\[
+\gamma_{\varepsilon,3}
+=
+\frac{\operatorname{E}(\varepsilon_t^3)}{\sigma_\varepsilon^3},
+\qquad
+\gamma_{\varepsilon,4}
+=
+\frac{\operatorname{E}(\varepsilon_t^4)}{\sigma_\varepsilon^4}-3.
+\]
+
+The dependence structure is particularly simple in the AR(1) case. Its
+autocovariance function is
+\begin{equation}
+\gamma(h)
+=
+\frac{\sigma_\varepsilon^2}{1-\phi^2}\phi^{|h|},
+\label{eq:ar1-acov}
+\end{equation}
+so the long-run variance is
+\[
+\sigma^2
+=
+\sum_{h\in\mathbb Z}\gamma(h)
+=
+\frac{\sigma_\varepsilon^2}{(1-\phi)^2}.
+\]
+We will also need the weighted autocovariance quantity
+\[
+B_2
+=
+2\sum_{h\ge1}h\gamma(h),
+\]
+which determines the leading block-length contribution in the higher-order
+BEL expansion. For the AR(1) model it has the simple form
+\[
+\frac{B_2}{\sigma^2}
+=
+\frac{2\phi}{1-\phi^2}.
+\]
+
+We use $N$ to denote the sample size. For a chosen block length $M$, we form
+$Q=\lfloor N/M\rfloor$ complete nonoverlapping blocks. In the theoretical
+development, we assume for simplicity that $N=QM$. If $M$ does not divide
+the available sample size, the final incomplete block is omitted and all BEL
+statistics and correction factors are evaluated using the $QM$ observations
+contained in the complete blocks. This complete-block convention is used
+throughout.
+
+For testing the null hypothesis $H_0$ given by $\mu=\mu_0$, define the block sums
+\[
+S_{i,M}(\mu_0)
+=
+\sum_{t=(i-1)M+1}^{iM}(X_t-\mu_0),
+\qquad i=1,\ldots,Q.
+\]
+The blockwise empirical likelihood is
+\[
+L_{N,M}(\mu_0)
+=
+\sup\left\{
+\prod_{i=1}^Q(Qp_i)
+\mathrel{\Big|}
+p_i\ge0,\ 
+\sum_{i=1}^Qp_i=1,\ 
+\sum_{i=1}^Qp_iS_{i,M}(\mu_0)=0
+\right\},
+\]
+with log-likelihood-ratio statistic
+\[
+LR_{N,M}(\mu_0)
+=
+-2\log L_{N,M}(\mu_0).
+\]
+When zero lies in the interior of the convex hull of the block sums, the
+multiplier $\lambda$ solves
+\[
+\sum_{i=1}^Q
+\frac{S_{i,M}(\mu_0)}
+     {1+\lambda S_{i,M}(\mu_0)}
+=
+0,
+\]
+and
+\[
+LR_{N,M}(\mu_0)
+=
+2\sum_{i=1}^Q
+\log\{1+\lambda S_{i,M}(\mu_0)\}.
+\]
+If the convex-hull condition fails, we set
+$LR_{N,M}(\mu_0)=\infty$.
+
+For reference, we collect below the conditions used throughout the asymptotic analysis. The particular conditions required for each result are specified separately.
+
+\begin{enumerate}
+[
+label=\textnormal{(A\arabic*)},
+ref=A\arabic*,
+leftmargin=*,
+itemsep=0.8ex
+]
+
+\item\label{cond:A1}
+\textit{$\{X_t\}$ is the stationary causal solution of \eqref{eq:ar1}. For uniform
+results, $|\phi|\le\rho<1$.}
+
+\item\label{cond:A2}
+\textit{The innovations satisfy $E|\varepsilon_0|^4<\infty$.}
+
+\item\label{cond:A3}
+\textit{The innovations are Gaussian or have a nonzero density
+$f\in C_c^\infty(\mathbb R)$.}
+
+\item\label{cond:A4}
+\textit{As $N\to\infty$,}
+\[
+M\to\infty,
+\qquad
+Q\to\infty,
+\qquad
+N=QM,
+\]
+\textit{and, for some $\kappa_0>0$,}
+\[
+M\le N^{1-\kappa_0},
+\qquad
+\frac{(\log N)^2}{M}\to0.
+\]
+
+\end{enumerate}
+
+Condition~\ref{cond:A1} is sufficient for the exact variance identities, while Conditions~\ref{cond:A1}--\ref{cond:A2} are used for one-block moment calculations. The stable-interior expansion uses Conditions~\ref{cond:A1}, \ref{cond:A3}, and~\ref{cond:A4}. Condition~\ref{cond:A3} supplies the moments and Cram\'er regularity needed for the Edgeworth argument. The boundary results use a separate triangular-array moment condition stated in Section~\ref{sec:correction-geometry}. A further moment condition used only for residual-moment plug-in is introduced in Section~\ref{sec:implementation}.
+
+\subsection{Exact variance calibration}
+\label{sec:exact-vc}
+
+The variance-ratio interpretation is developed for general weak dependence in \citet{Alksnis.Valeinis:2026}. For the present AR(1) model the mechanism can be seen directly. BEL is constructed from block sums of length $M$, whereas inference on the mean is governed by the complete-sample sum of length $N$. Both variance scales and their ratio are available in closed form.
+
+For $r\ge1$, define
+\[
+\Omega_r(\phi)
+=\operatorname{Var}\left\{r^{-1/2}\sum_{t=1}^r(X_t-\mu)\right\}.
+\]
+With
+\[
+D_r(\phi)
+=1+2\sum_{h=1}^{r-1}\left(1-\frac{h}{r}\right)\phi^h
+=\frac{1+\phi}{1-\phi}
+-\frac{2\phi(1-\phi^r)}{r(1-\phi)^2},
+\]
+the AR(1) covariance function gives
+\begin{equation}
+\Omega_r(\phi)
+=\frac{\sigma_\varepsilon^2}{1-\phi^2}D_r(\phi)
+=\sigma^2\left\{1-\frac{b_\phi}{r}(1-\phi^r)\right\},
+\qquad
+b_\phi=\frac{2\phi}{1-\phi^2}.
+\label{eq:Omega-r}
+\end{equation}
+Under Condition~\ref{cond:A1}, the population calibration ratio therefore becomes
+\begin{equation}
+\nu_{N,M}(\phi)
+=\frac{\Omega_M(\phi)}{\Omega_N(\phi)}
+=\frac{D_M(\phi)}{D_N(\phi)}.
+\label{eq:nu-exact}
+\end{equation}
+The ratio is invariant to $\mu$ and $\sigma_\varepsilon^2$. We define the variance-calibrated statistic by
+\[
+LR^V_{N,M}(\mu_0,\phi)
+=\nu_{N,M}(\phi)LR_{N,M}(\mu_0).
+\]
+Its AR(1) form also makes the effect of persistence explicit. For $1\le M<N$ and $0<\phi<1$, $\nu_{N,M}(\phi)$ is strictly decreasing in $\phi$ and
+\[
+\frac{M}{N}<\nu_{N,M}(\phi)<1,
+\qquad
+\nu_{N,M}(0)=1,
+\qquad
+\lim_{\phi\uparrow1}\nu_{N,M}(\phi)=\frac{M}{N}=\frac1Q.
+\]
+Thus no variance rescaling is needed at independence. As positive persistence increases, a block of fixed relative length represents a progressively smaller fraction of the complete-sample variance. The monotonicity proof is in the Supplementary Material.
+
+On every compact stability set $|\phi|\le\rho<1$,
+\begin{equation}
+\nu_{N,M}(\phi)
+=1-b_\phi\left(\frac1M-\frac1N\right)
++O_\rho\left(M^{-2}+N^{-2}+\frac{\rho^M}{M}\right).
+\label{eq:nu-expansion}
+\end{equation}
+The identity $b_\phi=B_2/\sigma^2$ shows that the AR(1) coefficient is the explicit form of the general weak-dependence variance correction in \citet{Alksnis.Valeinis:2026}. The same weighted autocovariances also appear in block-resampling bias calculations and in coverage expansions for HAC methods \citep{Kunsch:1989,Sun.etal:2008}.
+
+\subsection{Leading distributional expansion}
+
+Appendix~S3 derives the scalar signed-root and Edgeworth calculation needed on compact AR(1) stability sets. Its general weak-dependence counterpart is given in \citet{Alksnis.Valeinis:2026}. In the present model the block-length coefficient $B_2/\sigma^2$ equals
+\[
+\frac{B_2}{\sigma^2}=b_\phi=\frac{2\phi}{1-\phi^2}.
+\]
+Consequently, under Conditions~\ref{cond:A1}, \ref{cond:A3}, and~\ref{cond:A4}, and under $H_0$ given by $\mu=\mu_0$, uniformly in $z\ge0$,
+\begin{equation}
+P\{LR_{N,M}(\mu_0)\le z\}
+=G_1(z)-\left\{\frac{b_\phi}{M}+\frac{3}{2Q}\right\}zg_1(z)
++o(M^{-1}+Q^{-1}).
+\label{eq:ar1-raw-bel-expansion}
+\end{equation}
+Here $G_1$ and $g_1$ denote the distribution function and density of $\chi_1^2$. The term $b_\phi/M$ is the AR(1) form of the finite-block variance contribution. The term $3/(2Q)$ is the scalar finite-block-count contribution.
+
+Using the exact variance factor in \eqref{eq:nu-exact}, the same general result gives
+\begin{equation}
+P\{LR^V_{N,M}(\mu_0,\phi)\le z\}
+=G_1(z)-\frac{3}{2Q}zg_1(z)+o(M^{-1}+Q^{-1}).
+\label{eq:ar1-vc-bel-expansion}
+\end{equation}
+Thus exact variance calibration removes the process-specific $M^{-1}$ contribution.
+
+Applying in addition the leading scalar Bartlett factor gives
+\begin{equation}
+LR^{VL}_{N,M}(\mu_0,\phi)
+=\nu_{N,M}(\phi)\left(1-\frac{3}{2Q}\right)LR_{N,M}(\mu_0),
+\label{eq:leading-corrected-stat}
+\end{equation}
+with
+\begin{equation}
+P\{LR^{VL}_{N,M}(\mu_0,\phi)\le z\}
+=G_1(z)+o(M^{-1}+Q^{-1}).
+\label{eq:leading-corrected-expansion}
+\end{equation}
+The second-order expansion in Appendix~S3 then yields
+\begin{equation}
+\sup_{z\ge0}\left|P\{LR^{VL}_{N,M}\le z\}-G_1(z)\right|
+=O(M^{-2}+N^{-1}+Q^{-2}).
+\label{eq:leading-second-order-bound}
+\end{equation}
+These formulas are the AR(1) specialization of the general scalar theory. The remainder bound is retained as a conservative second-order statement.
+
+\subsection{Finite-$M$ Bartlett refinement}
+The leading multiplier $1-3/(2Q)$ removes the first-order block-count error. For finite $M$, the AR(1) covariance structure and the standardized skewness and excess kurtosis of a block sum can be used to refine that multiplier. Define
+\[
+\vartheta_{N,M}(\phi)
+=
+\frac{\phi(1-\phi^M)^2}{M(1-\phi)^2D_M(\phi)}
+\]
+and
+\begin{equation}
+a^G_{N,M}(\phi)
+=
+M\left\{2-\frac{1}{2\nu_{N,M}(\phi)}
++4\vartheta_{N,M}(\phi)^2\right\}.
+\label{eq:aG-refined}
+\end{equation}
+If
+\[
+Z_M=\frac{S_{1,M}(\mu)}{\{\operatorname{Var}(S_{1,M})\}^{1/2}},
+\qquad
+\eta_{3,M}=E(Z_M^3),
+\qquad
+\eta_{4,M}=\operatorname{cum}_4(Z_M),
+\]
+put
+\begin{equation}
+a^K_{N,M}
+=
+a^G_{N,M}
++
+M\left\{\frac12\eta_{4,M}-\frac13\eta_{3,M}^2\right\}.
+\label{eq:aK-refined}
+\end{equation}
+On compact stability sets,
+\begin{equation}
+a^K_{N,M}
+=
+\frac32M-\frac12b_\phi
++\frac12\gamma_{\varepsilon,4}
+-\frac13\gamma_{\varepsilon,3}^2
++O_\rho(M^{-1}+Q^{-1}+\rho^M).
+\label{eq:aK-expansion}
+\end{equation}
+We use
+\begin{equation}
+LR^{VK}_{N,M}(\mu_0,\phi)
+=
+\nu_{N,M}(\phi)
+\left(1-\frac{a^K_{N,M}}{N}\right)
+LR_{N,M}(\mu_0)
+\label{eq:refined-stat}
+\end{equation}
+as a finite-$M$ refinement. Since $a^K_{N,M}/N=3/(2Q)+O(N^{-1})$, it has the same first-order cancellation as \eqref{eq:leading-corrected-stat}. Closed forms for the block moments and the covariance derivation are given in the Supplementary Material. No sharp order-$N^{-1}$ coefficient is claimed here.
+
+\subsection{Block-count and stability-boundary regimes}
+\label{sec:correction-geometry}
+The coordinates $x$ and $Q$ separate block-scale persistence from the number of empirical-likelihood observations. For complete blocks,
+\[
+xQ=N(1-\phi)
+\]
+near $+1$, with the analogous identity $xQ=N(1+\phi)$ near $-1$. Hence a highly persistent finite sample may have no block length for which both coordinates are large.
+
+The boundary results below are separate triangular-array statements. We retain the iid innovation assumption in \eqref{eq:ar1} and assume $E|\varepsilon_0|^{4+\delta}<\infty$ for some $\delta>0$. They do not require Gaussianity or Condition~\ref{cond:A3}. All local-boundary limits are derived for the stationary causal initialization in Condition~\ref{cond:A1}. Different local-to-unity initializations generally lead to different boundary covariance structures.
+
+Before approaching a boundary, it is useful to record the short-block benchmark that complements Table~\ref{tab:four-regimes}.
+
+\begin{Proposition}[Fixed-block many-block benchmark]
+\label{prop:fixedM-manyQ}
+Under the innovation and stationarity conditions stated above, fix an integer $M\ge1$ and $\phi\in(-1,1)$. As $Q\to\infty$ with $N=QM$,
+\[
+\nu_{N,M}(\phi)\longrightarrow
+\nu_{\infty,M}(\phi)
+=
+D_M(\phi)\frac{1-\phi}{1+\phi},
+\]
+and
+\[
+LR_{N,M}(\mu)\Rightarrow
+\nu_{\infty,M}(\phi)^{-1}\chi_1^2,
+\qquad
+LR^V_{N,M}(\mu,\phi)\Rightarrow\chi_1^2.
+\]
+If $\widehat\phi\xrightarrow{p}\phi$, the same calibrated limit holds with $\nu_{N,M}(\widehat\phi)$ in place of $\nu_{N,M}(\phi)$.
+\end{Proposition}
+
+Thus exact variance calibration also gives first-order validity when the block length itself is fixed and the number of blocks increases. This regime is distinct from the local-boundary cell, where $M\to\infty$ and $\phi_M$ approaches $\pm1$.
+
+For fixed $Q$, $M/N=1/Q$ is nonvanishing, so the upper-right cell is related to fixed-$b$ reasoning. It differs from the overlapping construction of \citet{Zhang.Shao:2014}, where the number of smoothed moment observations increases and the limit is a Brownian functional. Here exactly $Q$ nonoverlapping observations remain, producing a finite-dimensional empirical-likelihood limit.
+
+\begin{Proposition}[Interior finite-$Q$ benchmark]
+\label{prop:fixedQ-interior}
+Fix $Q\ge2$ and $\phi\in(-1,1)$. Let $M\to\infty$ and $N=QM$. If $Z_1,\ldots,Z_Q$ are independent standard Gaussian variables, then
+\begin{equation}
+LR_{QM,M}(\mu)\Rightarrow \mathcal E_Q(Z_1,\ldots,Z_Q),
+\qquad
+LR^V_{QM,M}(\mu,\phi)\Rightarrow \mathcal E_Q(Z_1,\ldots,Z_Q).
+\label{eq:interior-fixedQ-law}
+\end{equation}
+The limiting convex-hull failure probability is $2^{1-Q}$.
+\end{Proposition}
+
+Thus fixed $Q$ alone produces a non-Wilks limit even when the process is well inside the stability region. We use this proposition as a benchmark rather than as a new fixed-$b$ result. The probability $2^{1-Q}$ is the scalar Gaussian convex-hull failure probability. Related finite-sample empirical-likelihood coverage bounds are studied by \citet{Tsao:2004}, while \citet{Zhang.Shao:2016} treat the time-series coverage-bound problem under fixed-$b$ asymptotics. The local boundary changes the covariance structure of this finite Gaussian limit vector rather than creating the finite-$Q$ phenomenon itself.
+
+For even $M$, writing $\phi=-1+\epsilon$ with $\epsilon\downarrow0$ gives
+\begin{equation}
+\nu_{N,M}(-1+\epsilon)
+=
+1+\frac{N-M}{4}\epsilon+O(\epsilon^2).
+\label{eq:V-negative-even}
+\end{equation}
+Since $N>M$, the factor initially increases above its boundary value
+$\nu_{N,M}(-1+)=1$. Moreover, $\nu_{N,M}(0)=1$, and
+$\nu_{N,M}$ is continuous on the extended interval $[-1,0]$.
+It therefore attains at least one maximum in the interior $(-1,0)$. Even blocks balance the nearly alternating correlations at the negative boundary, so the factor remains finite but is not monotone. If $M$ is odd and $Q$ is even, then
+\begin{equation}
+\nu_{N,M}(\phi)\sim\frac{1}{M\epsilon}\longrightarrow\infty,
+\qquad \phi=-1+\epsilon,
+\label{eq:V-negative-odd-evenQ}
+\end{equation}
+whereas if $M$ and $Q$ are both odd,
+\begin{equation}
+\nu_{N,M}(-1+)=Q.
+\label{eq:V-negative-odd-oddQ}
+\end{equation}
+The parity split is therefore present already in the exact partial-sum variance.
+
+\begin{Theorem}
+\label{thm:correction-boundary-layers}
+Fix $Q\ge2$ and $x>0$. For $\phi_M=1-x/M$, define
+\[
+K_c(x)=\frac{2}{x}-\frac{2(1-e^{-cx})}{cx^2},
+\qquad c\in\{1,Q\}.
+\]
+Then
+\begin{equation}
+\nu_{QM,M}(\phi_M)\longrightarrow V_+(x)=\frac{K_1(x)}{K_Q(x)}.
+\label{eq:Vplus-local}
+\end{equation}
+For later use define
+\begin{equation}
+u_{0,+}(x)=V_+(x),
+\qquad
+u_{1,+}(x)=\frac{(1-e^{-x})^2}{x^2K_Q(x)},
+\qquad
+u_{h,+}(x)=u_{1,+}(x)e^{-(h-1)x},\ h\ge1,
+\label{eq:positive-boundary-cov-sequence}
+\end{equation}
+and let $\Sigma_+(x)$ be the $Q\times Q$ Toeplitz matrix with diagonal $u_{0,+}(x)$ and lag-$h$ entry $u_{h,+}(x)$. For $\phi_M=-1+x/M$, take $M\to\infty$ along a fixed-parity subsequence and put
+\[
+L_c^{(s)}(x)=\frac12\left\{x+\frac{1-se^{-cx}}{c}\right\}.
+\]
+Then
+\begin{equation}
+\nu_{QM,M}(\phi_M)
+\longrightarrow
+V_-(x)
+=\frac{L_1^{((-1)^M)}(x)}{L_Q^{((-1)^N)}(x)}.
+\label{eq:Vminus-local}
+\end{equation}
+\end{Theorem}
+
+\begin{Remark}[Local-to-unity representation]
+\label{rem:ou-positive-boundary}
+For fixed $Q$, $\phi_M=1-x/M=1-xQ/N$, so the positive-boundary experiment is local to unity under the stationary initialization. If $J_x$ is stationary Ornstein--Uhlenbeck with covariance $e^{-x|r-s|}/(2x)$, then
+\[
+A_{i,Q}(x)=\left\{\frac{2x}{K_Q(x)}\right\}^{1/2}
+\int_{i-1}^{i}J_x(r)\,dr
+\]
+has covariance matrix $\Sigma_+(x)$. This gives a continuous-time interpretation of the positive-boundary Gaussian limit. The full derivation is in the Supplementary Material.
+\end{Remark}
+
+Near $-1$, the transformation $\widetilde Y_t=(-1)^t(X_t-\mu)$ turns the autoregressive coefficient into $-\phi_M=1-x/M$. It therefore explains why the same persistence scale reappears and why alternating block endpoints create parity effects. We retain the direct derivation because, without symmetric innovations, the transformed innovations alternate between the laws of $\varepsilon_t$ and $-\varepsilon_t$ and are not identically distributed.
+
+For the negative boundary, let $s_M=(-1)^M$, $s_N=(-1)^N$ and $\theta=s_Me^{-x}$. Define
+\begin{equation}
+u_0(x)=V_-(x),
+\qquad
+u_1(x)=-\frac{(1-s_Me^{-x})^2}{4L_Q^{(s_N)}(x)},
+\qquad
+u_h(x)=u_1(x)\theta^{h-1},\ h\ge1.
+\label{eq:boundary-cov-sequence}
+\end{equation}
+Let $\Sigma_-(x)$ be the $Q\times Q$ Toeplitz matrix generated by this sequence. Because $N=QM$, the pair $(+1,+1)$ occurs whenever $M$ is even. If $M$ is odd, the attainable pair is $(-1,+1)$ for even $Q$ and $(-1,-1)$ for odd $Q$.
+
+We first keep persistence non-negligible at the block scale and let the number of empirical-likelihood observations diverge. This is the lower-left cell of Table~\ref{tab:four-regimes}.
+
+\begin{Theorem}[Many-block local-boundary limits]
+\label{thm:manyQ-boundary}
+Let $M\to\infty$, $Q=Q_M\to\infty$, and $N=MQ$. Put
+\[
+W_{i,M}=\frac{S_{i,M}(\mu)}{\sqrt{M\Omega_N}},
+\qquad
+m_{2,Q}=\frac1Q\sum_{i=1}^QW_{i,M}^2.
+\]
+Under either local-boundary sequence below,
+\begin{equation}
+\frac{m_{2,Q}}{\nu_{N,M}}\xrightarrow{p}1,
+\qquad
+LR^V_{N,M}(\mu,\phi_M)\Rightarrow\chi_1^2.
+\label{eq:manyQ-vc-mechanism}
+\end{equation}
+
+For $\phi_M=1-x/M$ with fixed $x>0$, define
+\begin{equation}
+v_+(x)=1-\frac{1-e^{-x}}{x}.
+\label{eq:vplus-manyQ}
+\end{equation}
+Then $\nu_{N,M}\to v_+(x)$ and
+\begin{equation}
+LR_{N,M}(\mu)\Rightarrow v_+(x)^{-1}\chi_1^2.
+\label{eq:manyQ-positive-law}
+\end{equation}
+
+For $\phi_M=-1+x/M$ with fixed $x>0$, the variance-calibrated conclusion in \eqref{eq:manyQ-vc-mechanism} holds along the full sequence. Along any subsequence with $s=(-1)^M$ fixed, define
+\begin{equation}
+v_-^{(s)}(x)=1+\frac{1-se^{-x}}{x}.
+\label{eq:vminus-manyQ}
+\end{equation}
+Then $\nu_{N,M}\to v_-^{(s)}(x)$ and
+\begin{equation}
+LR_{N,M}(\mu)\Rightarrow \{v_-^{(s)}(x)\}^{-1}\chi_1^2.
+\label{eq:manyQ-negative-law}
+\end{equation}
+\end{Theorem}
+
+\begin{Corollary}[Feasible many-block variance calibration]
+\label{cor:feasible-manyQ-boundary}
+Under the conditions of Theorem~\ref{thm:manyQ-boundary}, let $\widehat\phi_M$ satisfy
+\[
+M(\widehat\phi_M-\phi_M)=o_p(1).
+\]
+Then
+\[
+\frac{\nu_{N,M}(\widehat\phi_M)}
+{\nu_{N,M}(\phi_M)}
+\xrightarrow{p}1,
+\qquad
+\nu_{N,M}(\widehat\phi_M)LR_{N,M}(\mu)
+\Rightarrow\chi_1^2.
+\]
+Thus estimating persistence does not affect first-order boundary calibration when the local coordinate is consistently estimated. Section~\ref{sec:implementation} verifies this condition for the unprojected Burg estimator when $Q\to\infty$.
+\end{Corollary}
+
+The theorem separates the roles of the two coordinates. The calibration result is driven by the exact identity $\mathbf 1^\top G_{N,M}\mathbf 1=Q$, the triangular-array central limit theorem for the normalized full-sample sum, and $m_{2,Q}/\nu_{N,M}\to_p1$. Finite $x$ by itself therefore does not prevent first-order Wilks calibration after exact variance adjustment. The non-Wilks boundary law below remains because the second coordinate, $Q$, is also kept finite.
+
+\begin{Theorem}
+\label{thm:fixedQ-boundary-law}
+Under the conditions of Theorem~\ref{thm:correction-boundary-layers}, set
+\[
+J_i=\Omega_N^{-1/2}\frac{S_{i,M}(\mu)}{M},
+\qquad
+W_M=\sqrt M\,(J_1,\ldots,J_Q)^\top.
+\]
+This normalization fixes the covariance matrices below. The empirical-likelihood functional itself is invariant to a further common nonzero rescaling of all coordinates. Then
+\[
+W_M\Rightarrow Z_+(x)\sim N_Q\{0,\Sigma_+(x)\}
+\]
+under $\phi_M=1-x/M$, and along each fixed-parity negative subsequence
+\[
+W_M\Rightarrow Z_-(x)\sim N_Q\{0,\Sigma_-(x)\}.
+\]
+The matrices $\Sigma_+(x)$ and $\Sigma_-(x)$ are strictly positive definite for every $x>0$. If $\mathcal E_Q$ denotes the extended-real-valued scalar finite-$Q$ empirical-likelihood functional with the usual convex-hull convention, then
+\begin{equation}
+LR_{QM,M}(\mu)\Rightarrow\mathcal E_Q\{Z_\pm(x)\},
+\label{eq:fixedQ-raw-boundary-law}
+\end{equation}
+and
+\begin{equation}
+LR^V_{QM,M}(\mu,\phi_M)\Rightarrow V_\pm(x)\mathcal E_Q\{Z_\pm(x)\}.
+\label{eq:fixedQ-vc-boundary-law}
+\end{equation}
+\end{Theorem}
+
+The interior finite-$Q$ benchmark is recovered from this family as $x\to\infty$. In that limit $V_\pm(x)\to1$ and $\Sigma_\pm(x)\to I_Q$, so the boundary law approaches $\mathcal E_Q(Z_1,\ldots,Z_Q)$. Sending $Q\to\infty$ after that recovers the ordinary Wilks limit.
+
+The fixed-$Q$ and many-block boundary limits are compatible. Writing the fixed-$Q$ quantities as $V_{\pm,Q}(x)$ and $\Sigma_{\pm,Q}(x)$, the exact identity $\mathbf 1^\top\Sigma_{\pm,Q}(x)\mathbf 1=Q$ implies
+\[
+V_{\pm,Q}(x)\mathcal E_Q\{Z_{\pm,Q}(x)\}\Rightarrow\chi_1^2
+\]
+as $Q\to\infty$ at fixed $x$. The Supplementary Material gives the argument.
+
+For $s\in\{+,-\}$, with a fixed parity subsequence understood when $s=-$, define
+\[
+T_{s,Q}(x)=V_s(x)\mathcal E_Q\{Z_s(x)\},
+\qquad
+F_{s,Q,x}(t)=P\{T_{s,Q}(x)\le t\},
+\]
+and let
+\[
+\pi_{s,Q}(x)=P\{T_{s,Q}(x)=+\infty\}
+\]
+be the limiting convex-hull failure probability.
+
+\begin{Corollary}[boundary calibration with known local coordinate]
+\label{cor:boundary-critical-values}
+Under the conditions of Theorem~\ref{thm:fixedQ-boundary-law}, fix $\alpha\in(0,1)$ and one of the corresponding local boundary sequences. If $\pi_{s,Q}(x)<\alpha$, define
+\[
+c_{s,1-\alpha}(x,Q)
+=
+\inf\{t\in\mathbb R:F_{s,Q,x}(t)\ge1-\alpha\}.
+\]
+This critical value is finite. If $F_{s,Q,x}$ is continuous at $c_{s,1-\alpha}(x,Q)$, then
+\[
+P\!\left\{
+LR^V_{QM,M}(\mu,\phi_M)>
+c_{s,1-\alpha}(x,Q)
+\right\}
+\longrightarrow\alpha.
+\]
+If $\pi_{s,Q}(x)>\alpha$, the convex-hull failure event alone has limiting probability above $\alpha$. Under the usual convention that such a failure gives an infinite empirical-likelihood ratio, no finite nonrandomized level-$\alpha$ cutoff for ordinary variance-calibrated BEL is available in that case.
+\end{Corollary}
+
+The corollary replaces the chi-squared cutoff by a quantile of the finite-$Q$ boundary law when the local coordinate is treated as known. For fixed $(x,Q)$ and a fixed parity regime on the negative boundary, the required distribution is determined by the explicit Gaussian covariance matrix and can be simulated directly.
+
+\begin{Remark}
+\label{rem:known-x-boundary}
+The distinction between Corollary~\ref{cor:feasible-manyQ-boundary} and Corollary~\ref{cor:boundary-critical-values} is important. When $Q\to\infty$, the local coordinate can be estimated consistently and first-order plug-in variance calibration is feasible. With fixed $Q$, the estimation error in the local coordinate need not vanish, so fitted-$x$ critical values are used below only as sensitivity calculations.
+\end{Remark}
+
+\section{Correction with estimated parameters and model robustness}
+\label{sec:estimated-robustness}
+
+\subsection{Plug-in correction under the AR(1) model}
+\label{sec:implementation}
+
+For stable-interior implementation we use the Burg estimator \citep{Burg:1968}
+\[
+\widehat\phi_B
+=
+\frac{
+2\sum_{t=2}^N(X_t-\bar X_N)(X_{t-1}-\bar X_N)
+}{
+\sum_{t=2}^N\{(X_t-\bar X_N)^2+(X_{t-1}-\bar X_N)^2\}
+}
+\]
+and the bias-reduced transform
+\[
+\widehat\phi_{BR}
+=
+\frac{\widehat\phi_B+N^{-1}}{1-3N^{-1}}.
+\]
+The transform is motivated by the Gaussian unknown-mean bias expansion of \citet{Zhang.McLeod:2006}. We project $\widehat\phi_{BR}$ onto $[-\rho_*,\rho_*]$, with $\rho<\rho_*<1$, and denote the result by $\widetilde\phi$.
+
+For residual-moment plug-in we additionally assume
+
+\medskip
+\noindent\textnormal{(A5)} \textit{For some $\delta>0$, $E|\varepsilon_0|^{8+\delta}<\infty$.}
+\medskip
+
+Residuals are
+\[
+\widehat\varepsilon_t
+=
+(X_t-\bar X_N)
+-\widetilde\phi(X_{t-1}-\bar X_N),
+\qquad t=2,\ldots,N,
+\]
+with sample skewness and excess kurtosis
+$\widehat\gamma_{\varepsilon,3}$ and
+$\widehat\gamma_{\varepsilon,4}$. Evaluating
+$\nu_{N,M}$ and $a^K_{N,M}$ at these estimates gives
+\begin{equation}
+\widehat\nu_{N,M}
+=
+\nu_{N,M}(\widetilde\phi),
+\qquad
+\widehat{LR}^{VK}_{N,M}
+=
+\widehat\nu_{N,M}
+\left(1-\frac{\widehat a^K_{N,M}}{N}\right)
+LR_{N,M}.
+\label{eq:plugin-full-statistic}
+\end{equation}
+On compact stability sets,
+\[
+\widehat\nu_{N,M}-\nu_{N,M}
+=
+O_p\{(M\sqrt N)^{-1}\},
+\qquad
+\widehat a^K_{N,M}-a^K_{N,M}
+=
+O_p(N^{-1/2}),
+\]
+so plug-in estimation does not alter the leading $M^{-1}$ and $Q^{-1}$ corrections.
+
+The local-boundary case uses the unprojected Burg estimator, since a fixed projection strictly inside $(-1,1)$ would eventually bind. Under either many-block local-boundary sequence of Theorem~\ref{thm:manyQ-boundary},
+\[
+M(\widehat\phi_B-\phi_M)
+=
+O_p(Q^{-1/2}).
+\]
+Hence the local coordinate is consistently estimated when $Q\to\infty$, and Corollary~\ref{cor:feasible-manyQ-boundary} yields a feasible first-order variance-calibrated boundary statistic. The Burg rate and the stable-interior plug-in calculations are proved in the Supplementary Material.
+
+\subsection{Dynamic misspecification}
+\label{sec:dynamic-misspecification}
+Up to this point the AR(1) model has been treated as the true dependence structure. In applications it may instead be a low-order working approximation. To see what the AR(1)-specific calibration then represents, let $Y_t=X_t-\mu$ denote a stationary process with
+\[
+\gamma(h)=\operatorname{Cov}(Y_0,Y_h),
+\qquad
+\sigma^2=\sum_{h\in\mathbb Z}\gamma(h)>0,
+\qquad
+b=\frac{2\sum_{h\ge1}h\gamma(h)}{\sigma^2}.
+\]
+If $\sum_{h\ge1}h^2|\gamma(h)|<\infty$, then
+\[
+\Omega_r=\sigma^2-\frac{b\sigma^2}{r}+o(r^{-2}).
+\]
+The $o(r^{-2})$ remainder follows from the weighted covariance summability. The short derivation is given in Appendix~S7 of the Supplementary Material.
+
+Low-order autoregressions are often used as working approximations in automatic HAC procedures \citep{Andrews:1991,Newey.West:1994}. We use the same idea here for the narrower purpose of examining how the AR(1)-specific BEL correction behaves when the true dynamics are not AR(1). Suppose an AR(1) is fitted to the process. Its population projection coefficient is
+\[
+\phi^\dagger=\frac{\gamma(1)}{\gamma(0)},
+\]
+so $M(1-|\phi^\dagger|)$ measures block-scale decay implied by the AR(1) projection. Under misspecification it need not equal the dependence scale of the true process. The two-coordinate interpretation is therefore exact for AR(1) and is only a working diagnostic in this subsection. The implied long-run variance is
+\begin{equation}
+\sigma^2_{\mathrm{AR},\dagger}
+=\gamma(0)\frac{1+\phi^\dagger}{1-\phi^\dagger}.
+\label{eq:pseudo-ar-lrv}
+\end{equation}
+Write $r_{\mathrm{AR}}=\sigma^2_{\mathrm{AR},\dagger}/\sigma^2$ and
+\[
+b_{\mathrm{AR}}^\dagger
+=\frac{2\phi^\dagger}{1-(\phi^\dagger)^2}.
+\]
+
+If $\sqrt N(\bar X_N-\mu)\Rightarrow N(0,\sigma^2)$ and the fitted AR variance estimator converges to \eqref{eq:pseudo-ar-lrv}, then under $H_0$
+\begin{equation}
+W_{\mathrm{AR}}\Rightarrow r_{\mathrm{AR}}^{-1}\chi_1^2,
+\qquad
+P\{W_{\mathrm{AR}}\le z_\alpha\}\longrightarrow G_1(z_\alpha r_{\mathrm{AR}}).
+\label{eq:wald-misspecification-limit}
+\end{equation}
+The error can therefore remain of order one. An incorrectly specified AR variance does not become harmless simply because the sample size increases.
+
+The corresponding discrepancy for the BEL variance factor is smaller. Uniformly on compact pseudo-AR stability sets,
+\begin{equation}
+\nu_{N,M}(\phi^\dagger)-\frac{\Omega_M}{\Omega_N}
+=(b-b_{\mathrm{AR}}^\dagger)\left(\frac1M-\frac1N\right)+o(M^{-1}).
+\label{eq:ar-vc-misspec-gap}
+\end{equation}
+Define
+\[
+LR^{A,L}_{N,M}
+=\nu_{N,M}(\phi^\dagger)\left(1-\frac{3}{2Q}\right)LR_{N,M}.
+\]
+
+If $M,Q\to\infty$, $M=O(Q)$, $|\phi^\dagger|\le\rho<1$, and the raw BEL expansion holds with the true coefficient $b$, then uniformly in $z\ge0$,
+\begin{equation}
+P\{LR^{A,L}_{N,M}\le z\}
+=G_1(z)-\frac{b-b_{\mathrm{AR}}^\dagger}{M}zg_1(z)
++o(M^{-1}+Q^{-1}).
+\label{eq:ar-bel-misspec-expansion}
+\end{equation}
+Thus AR-Wald can retain an order-one scale error, whereas the AR(1)-calibrated BEL discrepancy is attenuated by $M^{-1}$. The sign of $b-b_{\mathrm{AR}}^\dagger$ determines the first-order coverage direction.
+
+Analytical values for the simulation designs are reported in the Supplementary Material. They predict persistent AR-Wald undercoverage for the two AR(2) designs and overcoverage for the MA(1) design, while the BEL distortion is governed by $(b-b_{\mathrm{AR}}^\dagger)/M$.
+
+
+\section{Simulation study}
+\label{sec:simulation}
+The simulations are organized in the same coordinates as the theory. The main experiment starts from the limiting Gaussian block vector indexed by $(x,Q)$ instead of choosing $(N,\phi,M)$ first. This keeps block-scale persistence and block count separate and places all four directions in Table~\ref{tab:four-regimes} on one rectangular grid. We then compare the limit with exact finite-$(M,Q)$ Gaussian AR(1) block distributions. Smaller stable-interior and misspecification experiments check the higher-order refinement and the use of AR(1) as a working dependence model.
+
+The rectangular design uses
+\[
+x\in\{0.25,0.5,1,2,3,4,6,8,12\},
+\qquad
+Q\in\{5,6,8,10,15,20,30,50,100,200\}.
+\]
+For each cell we simulate the Gaussian limit law from Section~\ref{sec:correction-geometry} and evaluate raw BEL, exact variance calibration, the limiting Gaussian Bartlett refinement alone, and the combined correction. The Gaussian block law is the asymptotic law under the boundary moment condition above, not an innovation-distribution assumption. The boundary theorems justify the first-order variance-calibrated reference laws under that moment condition. We do not claim a non-Gaussian higher-order boundary theorem for the Bartlett continuation used in the combined panel. Each cell uses 20,000 replications. Convex-hull failure is treated as an infinite likelihood ratio. The 4--6\% rejection band used below is descriptive and is not a theoretical validity threshold. The largest Monte Carlo standard error over the reported rejection probabilities is below $0.0036$.
+
+\subsection{Calibration over the $(x,Q)$ geometry}
+Figure~\ref{fig:xq-positive-map} compares BEL without correction with the combined correction on the positive boundary. The left panel shows that increasing $Q$ alone does not remove the boundary-dependent scale distortion when $x$ is small, while the right panel shows the effect of applying both variance calibration and the Gaussian Bartlett refinement. The four corners give a direct numerical counterpart to Table~\ref{tab:four-regimes}. For the combined correction, rejection is $0.4867$ at $(x,Q)=(0.25,5)$ and $0.1482$ at $(12,5)$. Thus increasing $x$ does not restore Wilks calibration when the empirical likelihood still contains only five observations. In the opposite direction, rejection falls to $0.0516$ at $(0.25,200)$ and $0.0506$ at $(12,200)$. Many blocks can therefore recover ordinary calibration after the block-scale variance error has been removed.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.98\textwidth]{Figure2_positive_boundary_BEL_combined.pdf}
+\caption{Limit-law calibration over the positive-boundary $(x,Q)$ geometry. The left panel shows BEL without correction and the right panel shows the combined variance and Gaussian Bartlett correction. Each cell uses 20,000 draws from the limiting Gaussian block vector at the displayed local coordinate $x$ and block count $Q$. Gaussianity is a property of the limiting block vector and does not require Gaussian innovations. Crosses mark cells with rejection between 4\% and 6\% at the nominal 5\% chi-squared cutoff. The band is descriptive rather than a formal switching rule.}
+\label{fig:xq-positive-map}
+\end{figure}
+
+The intermediate corrections, shown in Figure~S2 of the Supplementary Material, isolate the role of the two components. At $x=0.25$ and $Q=200$, BEL without correction rejects with probability $0.5126$ and the Bartlett refinement alone gives $0.5121$. Exact variance calibration reduces rejection to $0.0523$, and the combined correction gives $0.0517$. This is the finite-$Q$ numerical continuation of Theorem~\ref{thm:manyQ-boundary}. Increasing the number of blocks does not remove the boundary-dependent scale distortion in uncorrected BEL, while variance calibration does.
+
+Small $Q$ produces a different problem. At $x=12$ and $Q=5$, the combined rejection probability remains $0.1482$, and the convex-hull failure probability is $0.0664$. At $x=0.25$ and $Q=5$, convex-hull failure rises to $0.4845$. The first case is mainly a finite-number-of-EL-observations problem. The second combines that effect with strong positive block correlation. The two mechanisms are therefore distinct even though both appear in the difficult finite-$(x,Q)$ corner.
+
+The transition across the grid is gradual rather than a universal boundary. For the combined correction on this positive-boundary limit design, $x=0.25$ requires roughly $Q=100$--$200$ before rejection is near the descriptive band. Values $x=0.5$ and $x=1$ are near that band around $Q=50$, while for $x\ge2$ the transition is generally visible by about $Q=20$--$30$. These values summarize this particular grid and should not be read as theorem-level cutoffs. The negative-boundary maps, reported in the Supplementary Material, show the parity effect predicted by the theory. In particular, the odd-$M$ small-$(x,Q)$ corner can be strongly overcorrected by the stable-interior Bartlett multiplier, reinforcing the need to distinguish the boundary law from an interior higher-order adjustment.
+
+\subsection{Finite-$M$ validation of the limiting map}
+Because the rectangular map uses the $M\to\infty$ limit, we also compare it with the exact finite-$(M,Q)$ Gaussian AR(1) block covariance. We use $x\in\{0.25,1,3,6\}$ and $Q\in\{10,20,50\}$, with four block lengths for each of the positive boundary, the negative boundary with even $M$, and the negative boundary with odd $M$. Each finite law and its corresponding limit law are simulated with 10,000 replications.
+
+Across 576 method-level comparisons, the mean absolute finite-versus-limit difference in rejection probability is $0.0025$, with maximum $0.0117$. At rejection probability near $0.05$, two independent estimates based on 10,000 replications have a difference standard error of about $0.0031$, so an average absolute difference of roughly $0.0025$ is expected from Monte Carlo noise alone. The experiment therefore detects no material systematic finite-$M$ discrepancy at its present resolution. Convex-hull failure shows mean and maximum absolute differences of $0.00026$ and $0.0035$. Detailed comparisons and Monte Carlo uncertainty are reported in the Supplementary Material.
+
+A non-Gaussian finite-$M$ validation under standardized $t_5$, centered $\chi_1^2$, and centered exponential innovations is reported in the Supplementary Material. Rejection using the corresponding finite-$Q$ boundary cutoff remains close to 5\% across the positive and negative parity cases examined there.
+
+\subsection{Stable-interior refinement and external benchmarks}
+A separate, smaller AR(1) experiment examines the finite-$M$ Bartlett refinement away from the stability boundary. We use $\phi\in\{0.5,0.8\}$, $N\in\{256,512,1024\}$, and $M=\lfloor\sqrt N\rfloor$. The main comparison is deliberately limited to the BEL variants, AR-Wald as a correctly specified parametric benchmark, and self-normalized inference as a model-robust benchmark \citep{Shao:2010,Shao:2010corr}. Gaussian innovations are reported in Table~\ref{tab:correct-ar1-gaussian}. Smooth compact-support innovations are covered by the higher-order assumptions. Centered exponential and centered standardized $\chi_1^2$ innovations lie outside Condition~\ref{cond:A3} and are included only as robustness checks.
+
+\begin{table}[htbp]
+\centering
+\caption{Empirical 95\% coverage for Gaussian AR(1) data, based on 10,000 replications per setting. General denotes the model-free leading-corrected BEL, AR(1) the finite-$M$ refinement, and SN self-normalized inference. BEL uses $Q=\lfloor N/M\rfloor$ complete blocks, so 506 observations enter when $N=512$ and all observations enter for $N=256$ and $1024$.}
+\label{tab:correct-ar1-gaussian}
+\small
+\begin{tabular}{rrrccccc}
+\toprule
+$\phi$ & $N$ & $M$ & Raw & General & AR(1) & AR-Wald & SN \\
+\midrule
+0.50 & 256 & 16 & 0.913 & 0.935 & 0.936 & 0.948 & 0.945 \\
+0.50 & 512 & 22 & 0.927 & 0.944 & 0.945 & 0.949 & 0.949 \\
+0.50 & 1024 & 32 & 0.939 & 0.948 & 0.949 & 0.952 & 0.951 \\
+0.80 & 256 & 16 & 0.878 & 0.922 & 0.932 & 0.942 & 0.933 \\
+0.80 & 512 & 22 & 0.900 & 0.935 & 0.940 & 0.947 & 0.943 \\
+0.80 & 1024 & 32 & 0.914 & 0.937 & 0.940 & 0.939 & 0.942 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+At $\phi=0.5$, both corrected BEL procedures are already close to nominal coverage. The additional AR(1) refinement is more visible at $\phi=0.8$. For $N=256$, raw BEL covers $0.878$, the model-free correction gives $0.922$, and the AR(1)-specific refinement gives $0.932$. By $N=1024$, the difference between the two corrected procedures is small. The same ordering holds in the non-Gaussian designs. These finite-sample results show the finite-sample effect of the refinement.
+
+\subsection{Dynamic misspecification}
+The misspecification experiment uses Gaussian AR(2), MA(1), and ARMA(1,1) processes. The AR-Wald results track the analytical predictions closely. At $N=1024$, its coverages are $0.921$ and $0.890$ for the two AR(2) designs, $0.983$ for MA(1), and $0.913$ for ARMA(1,1), compared with population predictions $0.924$, $0.890$, $0.983$, and $0.909$. The two corrected BEL procedures are much closer to nominal coverage than raw BEL in the AR(2) designs, but neither uniformly dominates under misspecification. This experiment is a robustness check for treating AR(1) as a working dependence model. It does not extend the AR(1)-specific local-boundary coordinate to arbitrary dynamics. The Supplementary Material summarizes the design, and the complete misspecification output is provided in the reproducibility repository.
+
+\section{Empirical illustration}
+\label{sec:empirical}
+
+We use the CBOE Volatility Index (VIX) to show how the two-coordinate results can be used with an observed series. The daily closing series is taken from FRED (series VIXCLS, sourced from the Chicago Board Options Exchange) \citep{FRED:VIXCLS}. We average the available daily closes within each calendar month and then take logs,
+\[
+X_t=\log(\overline{\mathrm{VIX}}_t).
+\]
+The sample runs from January 1990 through December 2024 and contains $N=420$ monthly observations.
+
+The Burg estimate is $\widehat\phi_B=0.883$ and the bias-reduced projected value is $\widetilde\phi=0.891$. In this section we write $\widehat\phi=\widetilde\phi$ for the fitted value. The projection is inactive. BIC selects one autoregressive lag. The intercept-only ADF rejects a unit root at 1\%, while KPSS does not reject level stationarity. Tests for additional lags, residual dependence, ARCH effects, and parameter instability do not reject at 5\%. Residual skewness and excess kurtosis are $1.756$ and $7.659$. We use AR(1) as a working dependence model rather than a Gaussian model for VIX. These diagnostics do not rule out long-memory alternatives, which are outside the short-memory misspecification expansion in Section~\ref{sec:dynamic-misspecification}. The combined-BEL intervals below use the residual-moment refinement in \eqref{eq:plugin-full-statistic}. Further diagnostics are given in the Supplementary Material.
+
+Candidate block lengths are first placed on the theoretical coordinates. For each $M$ we compute
+\[
+Q_M=\frac{N}{M},
+\qquad
+x_M=M(1-\widehat\phi).
+\]
+We use divisors of 420, so no observations are discarded. Since $N$ and $\widehat\phi$ are fixed,
+\[
+x_MQ_M=N(1-\widehat\phi)\approx45.6.
+\]
+The block choices therefore follow one curve through the $(x,Q)$ plane. Short blocks have many empirical-likelihood observations but small $x_M$. Longer blocks increase $x_M$ and reduce $Q_M$.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.94\textwidth]{Figure3_VIX_path_revised.pdf}
+\caption{The VIX block path over the positive-boundary calibration map for the combined correction. The background tiles show rejection probabilities from the rectangular limiting Gaussian experiment. The black curve shows the VIX relation $x_MQ_M=N(1-\widehat\phi)$. Solid white contours mark rejection probabilities of 4.5\% and 5.5\%, while the dashed contours mark 4\% and 6\%. White points show the complete block choices and the highlighted labelled points mark representative block lengths. The vertical axis is shown on a logarithmic scale.}
+\label{fig:vix-xq-path}
+\end{figure}
+
+Figure~\ref{fig:vix-xq-path} follows the observed block choices from the short-block end toward the region where only a few empirical-likelihood observations remain. At $M=2$, BEL without correction rejects 51.90\% of the time under the fitted Gaussian benchmark, while the combined correction rejects 5.23\%. Proposition~\ref{prop:fixedM-manyQ} provides the relevant first-order justification for variance calibration with a fixed short block and many blocks. At $M=12$ the combined rejection probability is 5.22\%. Longer blocks reduce the variance mismatch but eventually move the problem into the finite-$Q$ regime.
+
+Longer blocks change the problem because only a few empirical-likelihood observations remain. To isolate that effect, we keep the variance-calibrated statistic fixed and compare the chi-squared law with the interior finite-$Q$ law $\mathcal E_Q(Z_1,\ldots,Z_Q)$ and the $x$-dependent finite-$Q$ law $V_+(x)\mathcal E_Q\{Z_+(x)\}$. At $(M,Q)=(42,10)$ the corresponding exact Gaussian rejection probabilities are 10.46\%, 5.37\%, and 4.90\%. At $(70,6)$ they are 16.37\%, 5.68\%, and 5.04\%. Most of the long-block distortion is already explained by finite $Q$, with a further correction from the remaining block-scale dependence. At $(84,5)$ the convex-hull failure probability exceeds 5\%, so no finite nonrandomized 5\% cutoff is available from either non-Wilks reference.
+
+The $x$-dependent reference introduces one extra practical issue because the local coordinate has to be estimated. We checked its numerical impact in 50,000 Gaussian AR(1) replications, re-estimating $\phi$, $\nu_{N,M}$, and $x_M$ each time. Across $M=20,28,35,42,60,70$, rejection based on the estimated coordinate ranged from 4.99\% to 5.20\%. Conditional on already estimating the variance factor, replacing $x_M$ by its estimate changed rejection by only 0.02--0.06 percentage points. This is reassuring for the VIX design, but it is not a boundary plug-in theorem. Fitted-$x$ intervals are therefore reported only as sensitivity calculations.
+
+For the observed VIX series, $\bar X=2.910$ and $\exp(\bar X)=18.35$. Table~\ref{tab:vix-intervals} reports representative choices from the short, central, and long parts of the path, together with two non-EL benchmarks.
+
+\begin{table}[htbp]
+\centering
+\caption{Selected 95\% confidence intervals for the geometric VIX level $\exp(\mu)$. Combined-BEL intervals at $M=2$ and $M=12$ use the residual-moment refinement. For $M=42$ and $M=70$, the three variance-calibrated rows differ only in the reference law. The $x,Q$ rows use the fitted local coordinate and are sensitivity calculations. Gaussian calibration gives rejection under the fitted Gaussian AR(1) benchmark.}
+\label{tab:vix-intervals}
+\scriptsize
+\setlength{\tabcolsep}{3.2pt}
+\begin{tabular}{lcccc}
+\toprule
+Procedure & $M$ & $Q$ & Gaussian calibration & 95\% interval for $\exp(\mu)$ \\
+\midrule
+Raw BEL, $\chi_1^2$ & 2 & 210 & 51.90\% & $[17.59,\ 19.20]$ \\
+Combined correction, $\chi_1^2$ & 2 & 210 & 5.23\% & $[16.22,\ 21.35]$ \\
+Combined correction, $\chi_1^2$ & 12 & 35 & 5.22\% & $[16.04,\ 21.09]$ \\
+\addlinespace
+VC, $\chi_1^2$ & 42 & 10 & 10.46\% & $[15.84,\ 21.43]$ \\
+VC, interior finite-$Q$ & 42 & 10 & 5.37\% & $[15.35,\ 22.22]$ \\
+VC, $x,Q$ reference & 42 & 10 & 4.90\% & $[15.28,\ 22.34]$ \\
+\addlinespace
+VC, $\chi_1^2$ & 70 & 6 & 16.37\% & $[16.11,\ 20.93]$ \\
+VC, interior finite-$Q$ & 70 & 6 & 5.68\% & $[15.02,\ 22.46]$ \\
+VC, $x,Q$ reference & 70 & 6 & 5.04\% & $[14.88,\ 22.67]$ \\
+\addlinespace
+AR-Wald & -- & -- & 5.90\% & $[16.01,\ 21.03]$ \\
+Self-normalized & -- & -- & 6.62\% & $[16.43,\ 20.49]$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The long-block rows in Table~\ref{tab:vix-intervals} hold the statistic fixed, so their differences come only from the reference law. At $M=42$, the Gaussian rejection probability falls from 10.46\% with the chi-squared cutoff to 5.37\% with the interior finite-$Q$ cutoff and 4.90\% with the full $x,Q$ cutoff. At $M=70$ the corresponding values are 16.37\%, 5.68\%, and 5.04\%. Keeping the Bartlett refinement but retaining the chi-squared cutoff helps, but only partly. It gives rejection probabilities of 8.43\% and 12.79\%, with intervals $[15.67,21.70]$ and $[15.86,21.27]$. The long-block problem is therefore not mainly a missing higher-order factor. Once $Q$ is small, the reference distribution itself has changed.
+
+Correct size alone does not make the block choices equivalent. If a central part of the path still contains many blocks and the combined statistic is well described by chi-squared, that part is the natural place for primary reporting. For VIX, $M=12$ gives $[16.04,21.09]$. The fitted-$x$ intervals at $M=42$ and $M=70$ are much wider, $[15.28,22.34]$ and $[14.88,22.67]$, because only 10 and 6 block observations remain. The long-block laws are useful because they preserve size when $Q$ is small, not because they make those block choices as informative as the central ones. At the other end, very short blocks can also be calibrated, but the variance adjustment is much larger. We therefore report a central calibrated choice as the main result and use nearby and long-block choices to assess sensitivity. This is not an estimated optimal block-length rule.
+
+\section{Discussion}
+The main organizing principle is the pair $(x,Q)$. The coordinate $x$ measures block length relative to persistence, while $Q$ is the number of empirical-likelihood observations. When both diverge, ordinary BEL has the usual Wilks limit. Finite $x$ with $Q\to\infty$ creates a scale distortion that exact variance calibration removes. Finite $Q$ is qualitatively different because the empirical likelihood itself has a finite-dimensional non-Wilks limit. When both coordinates remain finite, that reference law depends on $x$, and near $-1$ it also depends on parity.
+
+The same variance calibration also has a simple fixed-block interpretation. With fixed $M$ and $Q\to\infty$, raw BEL converges to a scaled chi-squared law while the exact factor $\nu_{N,M}$ restores first-order chi-squared calibration. On the local boundary, first-order feasible calibration is available whenever the local coordinate is consistently estimated. The unprojected Burg estimator satisfies this requirement in the many-block regime. This contrasts with fixed $Q$, where the estimation error in the local coordinate need not vanish and the $x$-dependent critical values remain oracle reference laws.
+
+The simulations separate the two failure mechanisms. Increasing $Q$ removes finite-block-count distortion but does not correct a boundary-dependent variance scale. Increasing $x$ reduces block-scale persistence but cannot restore Wilks calibration when only a few empirical-likelihood observations remain. The VIX path illustrates the same distinction. At moderate block lengths, calibrated BEL is close to the parametric AR-Wald benchmark. At long block lengths, replacing the chi-squared cutoff by a finite-$Q$ law accounts for most of the remaining distortion, at the cost of wider intervals because only a few block observations remain.
+
+The stable-interior Bartlett calculation is a secondary higher-order layer rather than the main contribution. Exact variance calibration removes the leading process-specific $M^{-1}$ error, while the finite-$M$ Bartlett refinement adjusts the remaining block-count, covariance, and innovation-shape terms. We retain this refinement because it improves finite-sample calibration in the stable interior, but we do not claim a sharp order-$N^{-1}$ coefficient for the feasible statistic.
+
+Two limitations delimit the present scope. First, the fixed-$Q$ boundary critical values depend on a local coordinate that is not consistently estimable in that experiment. Second, the working-model misspecification expansion assumes short memory and does not cover fractional long-memory dynamics. Adjusted BEL could remove convex-hull failure when $Q$ is very small, but it changes the finite-$Q$ empirical-likelihood functional and requires a separate boundary analysis \citep{Wang.Polonik:2019}.
+
+\section*{Author contributions}
+R.A. conceptualization, methodology, formal analysis, software, visualization, and writing--original draft. J.V. conceptualization, supervision, validation, and writing--review and editing.
+
+\section*{Acknowledgments}
+During preparation of this manuscript, the authors used OpenAI ChatGPT and Anthropic Claude for LaTeX drafting and editing, code assistance, and independent algebraic and proof checks. All mathematical claims, code, numerical results, citations, and final text were reviewed and verified by the authors, who take full responsibility for the content.
+
+\section*{Funding}
+This work was supported by Project No. 1.1.1.8/1/24/I/003, ``Strengthening the Research and Development Capacity of Doctoral Studies at the University of Latvia in the Fields of Smart Specialisation.''
+
+\section*{Data availability statement}
+The daily CBOE Volatility Index series is publicly accessible through FRED under the identifier VIXCLS. The R code, random-number seeds, data-transformation code, Monte Carlo workbooks and machine-readable results, and figure-generation files will be deposited in a public GitHub repository before submission.
+
+\section*{Supplementary Material}
+{\small
+\noindent\textbf{Supplementary Material.} Additional information for this article is available online.
+
+\noindent Appendix S1. Higher-order conditions and AR(1) verification.\\
+Appendix S2. Exact variance calibration.\\
+Appendix S3. Scalar signed-root expansion and AR(1) specialization.\\
+Appendix S4. Scale-invariant Bartlett refinement.\\
+Appendix S5. Two-coordinate limits and boundary calibration.\\
+Appendix S6. Plug-in correction with estimated parameters.\\
+Appendix S7. Dynamic misspecification.\\
+Appendix S8. Simulation and implementation details.\\
+Appendix S9. Empirical illustration and additional details.\\
+Figure S1. Correction multipliers across the stability region and near the negative boundary.\\
+Figure S2. Positive-boundary Gaussian $(x,Q)$ map for all four procedures.\\
+Figure S3. Convex-hull failure probability over the positive-boundary $(x,Q)$ geometry.\\
+Figure S4. Negative-boundary Gaussian $(x,Q)$ map for even $M$.\\
+Figure S5. Negative-boundary Gaussian $(x,Q)$ map for odd $M$.\\
+Table S1. Analytical predictions under dynamic misspecification.\\
+Table S2. Non-Gaussian finite-$M$ validation of the variance-calibrated finite-$Q$ boundary law at $x=1$.\\
+Table S3. Fixed-$Q$ variance-calibrated boundary results.\\
+Table S4. Reference-law comparison along the long-block part of the VIX-implied path.\\
+Table S5. Same-sample estimation check for the positive-boundary calibration.
+
+\noindent Complete computational output and code are provided separately in the accompanying GitHub repository.
+}
+
+\section*{Conflict of interest}
+The authors declare no conflict of interest.
+
+\section*{Ethics statement}
+No human participants, animals, clinical data, or identifiable personal data are involved. Ethics approval and patient consent are not applicable.
+
+\begin{thebibliography}{99}
+
+\bibitem[Alksnis and Valeinis(2026)]{Alksnis.Valeinis:2026}
+Alksnis, R. and Valeinis, J. (2026), Variance calibration and higher-order accuracy for nonoverlapping blockwise empirical likelihood under weak dependence, preprint, Zenodo, doi: \href{https://doi.org/10.5281/zenodo.21893245}{10.5281/zenodo.21893245}.
+
+\bibitem[Andrews(1991)]{Andrews:1991}
+Andrews, D. W. K. (1991), Heteroskedasticity and autocorrelation consistent covariance matrix estimation, \emph{Econometrica}, 59, 817--858, doi: \href{https://doi.org/10.2307/2938229}{10.2307/2938229}.
+
+\bibitem[Brockwell and Davis(1991)]{Brockwell.Davis:1991}
+Brockwell, P. J. and Davis, R. A. (1991), \emph{Time Series: Theory and Methods}, 2nd ed., Springer, New York, doi: \href{https://doi.org/10.1007/978-1-4419-0320-4}{10.1007/978-1-4419-0320-4}.
+
+\bibitem[Burg(1968)]{Burg:1968}
+Burg, J. P. (1968), A new analysis technique for time series data, in \emph{NATO Advanced Study Institute on Signal Processing with Emphasis on Underwater Acoustics}, Enschede, The Netherlands, 12--23 August 1968.
+
+\bibitem[Chan and Liu(2010)]{Chan.Liu:2010}
+Chan, N. H. and Liu, L. (2010), Bartlett correctability of empirical likelihood for time series, \emph{Journal of the Japan Statistical Society}, 40, 221--238, doi: \href{https://doi.org/10.14490/jjss.40.221}{10.14490/jjss.40.221}.
+
+\bibitem[Chan et al.(2014)]{Chan.Chen.Yau:2014}
+Chan, N. H., Chen, K. and Yau, C. Y. (2014), On the Bartlett correction of empirical likelihood for Gaussian long-memory time series, \emph{Electronic Journal of Statistics}, 8, 1460--1490, doi: \href{https://doi.org/10.1214/14-EJS930A}{10.1214/14-EJS930A}.
+
+\bibitem[Chen et al.(2016)]{Chen.etal:2016}
+Chen, K., Chan, N. H. and Yau, C. Y. (2016), Bartlett correction of empirical likelihood for non-Gaussian short-memory time series, \emph{Journal of Time Series Analysis}, 37, 624--649, doi: \href{https://doi.org/10.1111/jtsa.12175}{10.1111/jtsa.12175}.
+
+\bibitem[Chicago Board Options Exchange(2026)]{FRED:VIXCLS}
+Chicago Board Options Exchange (2026), CBOE Volatility Index: VIX, FRED series VIXCLS, Federal Reserve Bank of St. Louis, \href{https://fred.stlouisfed.org/series/VIXCLS}{fred.stlouisfed.org/series/VIXCLS}, accessed 15 August 2026.
+
+\bibitem[Chuang and Chan(2002)]{Chuang.Chan:2002}
+Chuang, C.-S. and Chan, N. H. (2002), Empirical likelihood for autoregressive models, with applications to unstable time series, \emph{Statistica Sinica}, 12, 387--407.
+
+\bibitem[DiCiccio et al.(1991)]{DiCiccio.etal:1991}
+DiCiccio, T. J., Hall, P. and Romano, J. P. (1991), Empirical likelihood is Bartlett-correctable, \emph{The Annals of Statistics}, 19, 1053--1061, doi: \href{https://doi.org/10.1214/aos/1176348137}{10.1214/aos/1176348137}.
+
+
+\bibitem[van Giersbergen(2009)]{Giersbergen:2009}
+van Giersbergen, N. P. A. (2009), Bartlett correction in the stable AR(1) model with intercept and trend, \emph{Econometric Theory}, 25, 857--872, doi: \href{https://doi.org/10.1017/S0266466609090690}{10.1017/S0266466609090690}.
+
+\bibitem[van Giersbergen(2013)]{Giersbergen:2013}
+van Giersbergen, N. P. A. (2013), Bartlett correction in the stable second-order autoregressive model with intercept and trend, \emph{Statistica Neerlandica}, 67, 482--498, doi: \href{https://doi.org/10.1111/stan.12018}{10.1111/stan.12018}.
+
+\bibitem[Hall and La Scala(1990)]{Hall.LaScala:1990}
+Hall, P. and La Scala, B. (1990), Methodology and algorithms of empirical likelihood, \emph{International Statistical Review}, 58, 109--127, doi: \href{https://doi.org/10.2307/1403462}{10.2307/1403462}.
+
+\bibitem[Kitamura(1997)]{Kitamura:1997}
+Kitamura, Y. (1997), Empirical likelihood methods with weakly dependent processes, \emph{The Annals of Statistics}, 25, 2084--2102, doi: \href{https://doi.org/10.1214/aos/1069362388}{10.1214/aos/1069362388}.
+
+\bibitem[K\"unsch(1989)]{Kunsch:1989}
+K\"unsch, H. R. (1989), The jackknife and the bootstrap for general stationary observations, \emph{The Annals of Statistics}, 17, 1217--1241, doi: \href{https://doi.org/10.1214/aos/1176347265}{10.1214/aos/1176347265}.
+
+\bibitem[Newey and West(1994)]{Newey.West:1994}
+Newey, W. K. and West, K. D. (1994), Automatic lag selection in covariance matrix estimation, \emph{The Review of Economic Studies}, 61, 631--653, doi: \href{https://doi.org/10.2307/2297912}{10.2307/2297912}.
+
+\bibitem[Monti(1997)]{Monti:1997}
+Monti, A. C. (1997), Empirical likelihood confidence regions in time series models, \emph{Biometrika}, 84, 395--405, doi: \href{https://doi.org/10.1093/biomet/84.2.395}{10.1093/biomet/84.2.395}.
+
+\bibitem[Owen(1988)]{Owen:1988}
+Owen, A. B. (1988), Empirical likelihood ratio confidence intervals for a single functional, \emph{Biometrika}, 75, 237--249, doi: \href{https://doi.org/10.1093/biomet/75.2.237}{10.1093/biomet/75.2.237}.
+
+\bibitem[Owen(2001)]{Owen:2001}
+Owen, A. B. (2001), \emph{Empirical Likelihood}, Chapman and Hall/CRC, Boca Raton, FL, doi: \href{https://doi.org/10.1201/9781420036152}{10.1201/9781420036152}.
+
+\bibitem[Phillips(1987)]{Phillips:1987}
+Phillips, P. C. B. (1987), Towards a unified asymptotic theory for autoregression, \emph{Biometrika}, 74, 535--547, doi: \href{https://doi.org/10.1093/biomet/74.3.535}{10.1093/biomet/74.3.535}.
+
+\bibitem[Shao(2010a)]{Shao:2010}
+Shao, X. (2010a), A self-normalized approach to confidence interval construction in time series, \emph{Journal of the Royal Statistical Society: Series B (Statistical Methodology)}, 72, 343--366, doi: \href{https://doi.org/10.1111/j.1467-9868.2009.00737.x}{10.1111/j.1467-9868.2009.00737.x}.
+
+\bibitem[Shao(2010b)]{Shao:2010corr}
+Shao, X. (2010b), Corrigendum: A self-normalized approach to confidence interval construction in time series, \emph{Journal of the Royal Statistical Society: Series B (Statistical Methodology)}, 72, 695--696, doi: \href{https://doi.org/10.1111/j.1467-9868.2010.00754.x}{10.1111/j.1467-9868.2010.00754.x}.
+
+\bibitem[Sun et al.(2008)]{Sun.etal:2008}
+Sun, Y., Phillips, P. C. B. and Jin, S. (2008), Optimal bandwidth selection in heteroskedasticity--autocorrelation robust testing, \emph{Econometrica}, 76, 175--194, doi: \href{https://doi.org/10.1111/j.0012-9682.2008.00822.x}{10.1111/j.0012-9682.2008.00822.x}.
+
+\bibitem[Tsao(2004)]{Tsao:2004}
+Tsao, M. (2004), Bounds on coverage probabilities of the empirical likelihood ratio confidence regions, \emph{The Annals of Statistics}, 32, 1215--1221, doi: \href{https://doi.org/10.1214/009053604000000337}{10.1214/009053604000000337}.
+
+\bibitem[Wang and Polonik(2019)]{Wang.Polonik:2019}
+Wang, G. and Polonik, W. (2019), High order adjusted block-wise empirical likelihood for weakly dependent data, arXiv:1912.07699, doi: \href{https://doi.org/10.48550/arXiv.1912.07699}{10.48550/arXiv.1912.07699}.
+
+\bibitem[Yau(2012)]{Yau:2012}
+Yau, C. Y. (2012), Empirical likelihood in long-memory time series models, \emph{Journal of Time Series Analysis}, 33, 269--275, doi: \href{https://doi.org/10.1111/j.1467-9892.2011.00756.x}{10.1111/j.1467-9892.2011.00756.x}.
+
+\bibitem[Zhang and McLeod(2006)]{Zhang.McLeod:2006}
+Zhang, Y. and McLeod, A. I. (2006), Computer algebra derivation of the bias of linear estimators of autoregressive models, \emph{Journal of Time Series Analysis}, 27, 157--165, doi: \href{https://doi.org/10.1111/j.1467-9892.2005.00459.x}{10.1111/j.1467-9892.2005.00459.x}.
+
+\bibitem[Zhang and Shao(2014)]{Zhang.Shao:2014}
+Zhang, X. and Shao, X. (2014), Fixed-$b$ asymptotics for blockwise empirical likelihood, \emph{Statistica Sinica}, 24, 1179--1194, doi: \href{https://doi.org/10.5705/ss.2012.321}{10.5705/ss.2012.321}.
+
+\bibitem[Zhang and Shao(2016)]{Zhang.Shao:2016}
+Zhang, X. and Shao, X. (2016), On the coverage bound problem of empirical likelihood methods for time series, \emph{Journal of the Royal Statistical Society: Series B (Statistical Methodology)}, 78, 395--421, doi: \href{https://doi.org/10.1111/rssb.12119}{10.1111/rssb.12119}.
+\end{thebibliography}
+
+\smallskip
+{\small\noindent\textbf{Present address and e-mail:} Reinis Alksnis, Laboratory of Statistical Research and Data Analysis, Department of Mathematics, Faculty of Science and Technology, University of Latvia, Jelgavas Street 3, LV-1004 Riga, Latvia. E-mail: \texttt{reinis.alksnis@lu.lv}.}
+
+\end{document}

@@ -1,0 +1,5 @@
+innovation,innovation_code,gamma3,gamma4,role
+Gaussian,1,0,0,Theory-backed
+Smooth compact-support,2,1.7927548971235,4.498126066938731,Theory-backed
+Centered exponential,3,2,6,Robustness
+Centered chi-square(1),4,2.8284271247461903,12,Robustness

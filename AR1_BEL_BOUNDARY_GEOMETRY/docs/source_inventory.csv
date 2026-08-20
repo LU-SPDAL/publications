@@ -1,0 +1,22 @@
+source_archive,status,use_in_public_repository
+AR1BEL_SIM_v3_repaired(2).zip,current core simulation source,stable-interior and misspecification C++ engine
+AR1BEL_SIM_v2(1).zip,superseded,excluded
+BARTLETT_FOLLOWUP_ADDON(1).zip,superseded targeted follow-up,excluded
+BEL_XQ_GEOMETRY_v1.0.0.zip,superseded by v1.0.1,excluded
+BEL_XQ_GEOMETRY_v1.0.1.zip,current geometry source,boundary geometry and finite-M validation
+AR1_BEL_CPI_VIX_STUDY_v3.0.0_release(1).zip,earlier empirical candidate,excluded
+AR1_BEL_EQUITY_VIX_DUAL_RESIDUAL_BOOTSTRAP_v1.0.0(1).zip,earlier empirical candidate,excluded
+AR1_BEL_EQUITY_VIX_DUAL_RESIDUAL_BOOTSTRAP_v1.0.1(1).zip,later maintenance version of unused candidate,excluded
+AR1_BEL_LOG_VIX_RESIDUAL_BOOTSTRAP_v1.0.0(2).zip,development VIX robustness branch,excluded
+AR1_BEL_POWER_SELECTION_v1.0.2(1).zip,development block-selection branch,excluded
+AR1_BEL_REAL_DATA_STUDY_v2.4.2(1).zip,earlier empirical branch,excluded
+AR1_BEL_VXAPL_RESIDUAL_BOOTSTRAP_v1.1.0(1).zip,abandoned candidate series,excluded
+SJS_FINAL_FIGURE_WORKSPACE.zip,current final geometry workbook,archived geometry results
+results_vix_empirical.zip,current VIX output,archived VIX results
+results_vix_three_reference_regimes.zip,current long-block VIX reference output,archived reference-law results
+results_boundary_inference.zip,earlier oracle boundary experiment,excluded from current submission package
+results(5).zip,exploratory long-memory diagnostics,excluded from submitted analysis
+run_vix_empirical_v2.R,current standalone VIX runner,basis for scripts/06_vix_empirical.R
+run_vix_three_reference_regimes.R,current standalone VIX reference-law runner,basis for scripts/07_vix_reference_laws.R
+run_boundary_calibrated_inference.R,earlier oracle boundary runner,excluded from current submission package
+VIXCLS_FRED.csv,frozen empirical data,data/raw/VIXCLS_FRED.csv

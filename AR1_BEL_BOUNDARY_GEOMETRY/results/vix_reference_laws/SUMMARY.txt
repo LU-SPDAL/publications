@@ -1,0 +1,31 @@
+VIX comparison of three BEL reference distributions
+===================================================
+
+Sample size N = 420
+Bias-reduced Burg phi_tilde = 0.89148502
+N(1-phi_tilde) = 45.576291
+Critical-value replications per reference = 300000
+Independent finite-sample size replications per M = 100000
+
+For every M, the SAME variance-calibrated statistic LR^V is tested with
+the chi-squared, interior finite-Q, and x-dependent finite-Q cutoffs.
+
+Results by block length:
+M=12 Q=35 x=1.3022 | cutoffs chi2=3.8415 interior=4.1275 boundary=4.2698 | sizes 0.0633 0.0549 0.0513 | best=xQ boundary
+M=15 Q=28 x=1.6277 | cutoffs chi2=3.8415 interior=4.1964 boundary=4.4003 | sizes 0.0660 0.0552 0.0499 | best=xQ boundary
+M=20 Q=21 x=2.1703 | cutoffs chi2=3.8415 interior=4.4276 boundary=4.6360 | sizes 0.0704 0.0536 0.0490 | best=xQ boundary
+M=28 Q=15 x=3.0384 | cutoffs chi2=3.8415 interior=4.9013 boundary=5.1610 | sizes 0.0829 0.0541 0.0490 | best=xQ boundary
+M=35 Q=12 x=3.7980 | cutoffs chi2=3.8415 interior=5.3919 boundary=5.7425 | sizes 0.0922 0.0536 0.0478 | best=xQ boundary
+M=42 Q=10 x=4.5576 | cutoffs chi2=3.8415 interior=6.0681 boundary=6.4548 | sizes 0.1046 0.0537 0.0490 | best=xQ boundary
+M=60 Q=7 x=6.5109 | cutoffs chi2=3.8415 interior=9.2513 boundary=10.2717 | sizes 0.1399 0.0560 0.0505 | best=xQ boundary
+M=70 Q=6 x=7.5960 | cutoffs chi2=3.8415 interior=13.7235 boundary=17.0379 | sizes 0.1637 0.0568 0.0504 | best=xQ boundary
+M=84 Q=5 x=9.1153 | cutoffs chi2=3.8415 interior=Inf boundary=Inf | sizes 0.1966 NA NA | best=chi-squared
+
+Interpretation guide:
+1. If Q is large, variance calibration can be used with the chi-squared law.
+2. If Q is small but x is large, the interior finite-Q law addresses the block-count effect.
+3. If both x and Q remain finite, the x-dependent finite-Q law retains both effects.
+4. If the convex-hull failure probability reaches 5%, no finite nonrandomized 5% cutoff exists.
+
+The fitted-x boundary intervals are numerical sensitivity calculations.
+They are not presented as a theorem for an estimated local coordinate.

@@ -1,0 +1,1987 @@
+\documentclass[12pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{amsmath,amssymb,amsfonts,amsthm,mathtools}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage[authoryear,round]{natbib}
+\usepackage[hidelinks]{hyperref}
+
+\allowdisplaybreaks
+\setlength{\emergencystretch}{2em}
+\setlength{\parindent}{1.5em}
+\setlength{\parskip}{0pt}
+\setcounter{secnumdepth}{3}
+
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\thesubsection.\arabic{subsubsection}}
+\renewcommand{\theequation}{S\arabic{equation}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+
+\newtheorem{Proposition}{Proposition}[section]
+\newtheorem{Theorem}[Proposition]{Theorem}
+\newtheorem{Lemma}[Proposition]{Lemma}
+\newtheorem{Corollary}[Proposition]{Corollary}
+\newtheorem{Condition}[Proposition]{Condition}
+\theoremstyle{remark}
+\newtheorem{Remark}[Proposition]{Remark}
+
+\title{Supporting Information for\\[0.5ex]
+\emph{Block-Scale Persistence and Block Count in Blockwise Empirical Likelihood for a First-Order Autoregression}}
+\author{Reinis Alksnis and Janis Valeinis\\[0.5ex]
+\small Laboratory of Statistical Research and Data Analysis, Department of Mathematics,\\
+\small Faculty of Science and Technology, University of Latvia,\\
+\small Jelgavas Street 3, LV-1004 Riga, Latvia\\[0.5ex]
+\small Reinis Alksnis \texttt{reinis.alksnis@lu.lv} \quad Janis Valeinis \texttt{janis.valeinis@lu.lv}\\[0.5ex]
+\small Corresponding author Reinis Alksnis}
+\date{}
+
+% Main-manuscript equation/result numbers cited below are written explicitly so that
+% this Supporting Information compiles as a standalone file. If the numbering in the
+% main manuscript changes, update those explicit numbers at the same time.
+
+\begin{document}
+\maketitle
+
+\noindent
+This Supporting Information provides self-contained derivations for the technical results used in the main manuscript together with the detailed numerical design. In particular, Appendix~S3 gives the scalar signed-root algebra, the Edgeworth transfer, and the conservative second-order argument specialized to the AR(1) setting. The related preprint of \citet{Alksnis.Valeinis:2026} develops the corresponding theory under broader weak dependence, but no result in the present manuscript relies on it as an external proof source. Complete Monte Carlo workbooks, R code, random-number seeds, and figure-generation scripts will be available in the accompanying public GitHub repository. Unless stated otherwise, we use the complete-block convention $N=QM$.
+
+\medskip
+\noindent\textbf{Relation to the companion preprint.}
+The general weak-dependence preprint of \citet{Alksnis.Valeinis:2026} supplies the stable-interior framework. The present paper uses the following division of results:
+\begin{center}
+\begin{tabular}{p{0.40\textwidth}p{0.50\textwidth}}
+\toprule
+Result & Role in the present paper \\
+\midrule
+Leading stable-interior BEL expansion and conservative second-order rate
+& AR(1) specialization of the general weak-dependence theory, reproduced here for self-contained verification. \\
+Exact $\nu_{N,M}(\phi)$, monotonicity, and finite-$M$ Bartlett coefficient
+& AR(1)-specific closed-form calculations developed here. \\
+Fixed-block and local-boundary many-block limits
+& AR(1)-specific results developed here. \\
+Fixed-$Q$ local-boundary Gaussian laws, critical values, and parity effect near $-1$
+& AR(1)-specific boundary results developed here. \\
+Feasible many-block boundary variance calibration
+& AR(1)-specific plug-in consequence developed here. \\
+Dynamic misspecification calculation
+& Working-model interpretation specialized to the present AR(1) calibration. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+
+\medskip
+\noindent\textbf{Contents.}
+Appendix S1. Higher-order conditions and AR(1) verification\\
+Appendix S2. Exact variance calibration\\
+Appendix S3. Scalar signed-root expansion and AR(1) specialization\\
+Appendix S4. Scale-invariant Bartlett refinement\\
+Appendix S5. Two-coordinate limits, boundary covariance derivations, and boundary calibration\\
+Appendix S6. Plug-in correction with estimated parameters\\
+Appendix S7. Dynamic misspecification\\
+Appendix S8. Simulation and implementation details\\
+Appendix S9. Empirical illustration and additional details.
+
+\section{Higher-order conditions and AR(1) verification}
+\label{supp:conditions}
+This section verifies directly that the stationary AR(1) model satisfies the block-array conditions used by the self-contained scalar calculation in Appendix~S3 on every compact stability set $|\phi|\le\rho<1$. For
+\[
+Z_{j,N}=\frac{S_{j,M}}{\sqrt{M\Omega_M}},
+\qquad
+\mathbf W^{[k]}_{j,N}
+=\bigl(Z_{j,N},Z_{j,N}^2-1,\ldots,Z_{j,N}^k-EZ_{j,N}^k\bigr)^\top,
+\quad k\le6,
+\]
+we use
+\begin{equation}
+M\to\infty,\qquad Q\to\infty,\qquad N=QM,\qquad
+M\le N^{1-\kappa_0},\qquad \frac{(\log N)^2}{M}\to0
+\label{eq:supp-block-growth}
+\end{equation}
+for some $\kappa_0>0$.
+
+\subsection{Dependence, moments, and local approximation}
+Using the standard causal AR(1) representation \citep[Ch.~3]{Brockwell.Davis:1991}, write $Y_t=X_t-\mu=\sum_{j\ge0}\phi^j\varepsilon_{t-j}$. For $r\ge3$,
+\[
+\operatorname{cum}(Y_{t_1},\ldots,Y_{t_r})
+=\kappa_r(\varepsilon_0)\sum_{u\le t_*}\prod_{\ell=1}^r\phi^{t_\ell-u},
+\qquad t_*=\min_\ell t_\ell,
+\]
+so, uniformly for $|\phi|\le\rho$,
+\begin{equation*}
+|\operatorname{cum}(Y_{t_1},\ldots,Y_{t_r})|
+\le C_r\rho^{\max t_\ell-\min t_\ell}.
+\end{equation*}
+All fixed-order weighted cumulant sums used in the expansion are therefore finite. Condition~(A3) supplies moments of every order. More explicitly, for the $s=6$ expansion Lahiri's Condition~C.2(i) uses $h_6(u)=u^6\{\log(1+u)\}^{72}$. Since $\|\mathbf W^{[6]}_{j,N}\|$ is bounded by a polynomial of degree six in $|Z_{j,N}|$, it is enough to control
+\[
+\sup_{N,j}E\left[|Z_{j,N}|^{36}\{\log(1+|Z_{j,N}|)\}^{72}\right]<\infty.
+\]
+Gaussian innovations and compactly supported $C_c^\infty$ innovations satisfy this bound, and Rosenthal-type inequalities give the corresponding uniform bounds for the normalized block sums. Thus $\sup_{N,j}E|Z_{j,N}|^p<\infty$ for every fixed $p$.
+
+For $m\ge0$ let $Y_t^{(m)}=\sum_{j=0}^m\phi^j\varepsilon_{t-j}$. Then
+\[
+\|Y_t-Y_t^{(m)}\|_p\le C_p\rho^m.
+\]
+Taking $r_N=\lceil L\log N\rceil$ and using \eqref{eq:supp-block-growth} gives $r_N=o(M)$. The same exponential approximation transfers to every fixed-degree coordinate of $\mathbf W^{[k]}_{j,N}$. With the auxiliary fields $\mathcal D_t=\sigma(\varepsilon_t)$, the mixing and approximate-Markov requirements in the block-variable framework of \citet{Lahiri:2007} are therefore immediate after truncation.
+
+For covariance nondegeneracy, the one-block vector converges to
+\[
+(G,G^2-1,G^3,G^4-3,\ldots,G^k-EG^k)^\top,
+\qquad G\sim N(0,1),
+\]
+whose covariance matrix $\Sigma_k$ is positive definite for $k\le6$. Indeed, a zero-variance linear combination would give a polynomial in $G$ of degree at most six that is constant almost surely, which is impossible unless all centered coefficients vanish. Extending Lemma~\ref{lem:supp-cross-block-cumulants} through atomic order 12 and applying the moment--cumulant formula to products of powers gives the same geometric cross-block decay for the coordinates of $\mathbf W^{[k]}_{j,N}$, $k\le6$. Consequently, uniformly for $1\le m\le Q^{1/2}$,
+\[
+\operatorname{Cov}\left(\sum_{j=j_0+1}^{j_0+m}\mathbf W^{[k]}_{j,N}\right)
+=m\Sigma_k+o(m),
+\]
+and the same relation holds with $m=Q$. This verifies the required partial-sum and full-sum nondegeneracy for the block-power array used in the higher-order expansion.
+
+\subsection{Conditional Cram\'er condition}
+The only condition that is not automatic from geometric truncation is the conditional Cram\'er separation. Fix $k\le6$ and a unit direction $c=(c_1,\ldots,c_k)$. Up to the exponentially small truncation error, a linear combination of the block-power coordinates is $P_c(Z_{j,N})-E\{P_c(Z_{j,N})\}$, where $P_c(z)=\sum_{r=1}^k c_rz^r$ is nonconstant. Conditional on the exterior innovations, the central part of the block contains $M-2r_N$ independent innovations. On compact frequency annuli, convergence to the Gaussian block limit and compactness in $c$ give a uniform characteristic-function gap below one.
+
+For the growing-frequency part, retain a central subcore of $k_N=\lfloor c_0M\rfloor$ innovations, with fixed $0<c_0<1/4$, rather than conditioning down to a single innovation. The normalized AR(1) block weights of these interior innovations are all of order $M^{-1/2}$, so their retained contribution has conditional variance bounded above and away from zero uniformly on compact stability sets. Under Condition~(A3) this contribution has an $O(1)$-scale smooth density: it is Gaussian in the Gaussian case, while in the $C_c^\infty$ case it is a convolution of $k_N\asymp M$ scaled smooth densities. Standard smoothing bounds for these convolutions, followed by integration by parts or the degree-six polynomial van der Corput bound for the phase $\theta P_c(z_0+u)$, give uniform decay for polynomial phases of degree at most six. Uniformity over $\|c\|=1$ follows from the same polynomial bound after shifting by $z_0$. Any polynomial growth of its constant in $|z_0|$ is integrable under the uniform moment bounds supplied by Condition~(A3). The compact-frequency Gaussian-limit argument and this core-smoothing argument overlap and therefore cover the full frequency annulus required by Lahiri's conditional Cram\'er condition. In particular, no intermediate band of order $1\ll |\theta|\ll M^{1/2}$ is left untreated. This is the same block-Gaussianization mechanism used in the proof of \citet[Theorem~3.2]{Lahiri:2007}, here applied to polynomial coordinates through degree six. Thus the six-power Cram\'er condition used for the population expansion follows from Condition~(A3).
+
+Take $m_N=\lfloor Q^{1/8}\rfloor$, $d_N=Q^{1/8}$, $a_0=17/8$, and $\kappa_L=1/2$. Then $m_N^{-1}+m_NQ^{-1/2}=o(1)$, $d_N^2m_N=Q^{3/8}=O(Q^{1-\kappa_L})$, and $a_0=17/8>(6-2)/2$. Hence Condition~C.6 holds for $s=6$, while the preceding arguments verify C.1--C.5. The nonoverlapping analogue of Theorems~2.1--2.4 of \citet{Lahiri:2007} is stated after his Theorem~2.4 and detailed in \citet{Lahiri:2006preprint}.
+
+\begin{Lemma}[Population block-power Edgeworth applicability]
+\label{lem:supp-knownparam-edgeworth-applicability}
+Under Conditions~(A1), (A3), and (A4) of the main manuscript, the block-power arrays used for the population-parameter signed-root expansion satisfy the nonoverlapping version of \citet[Theorem~2.1]{Lahiri:2007} with $s=6$, uniformly on compact stability sets.
+\end{Lemma}
+
+
+
+\section{Exact variance calibration}
+\label{supp:variance}
+By stationarity,
+\begin{align*}
+\Omega_r(\phi)
+&=\gamma(0)+2\sum_{h=1}^{r-1}\left(1-\frac hr\right)\gamma(h)\\
+&=\frac{\sigma_\varepsilon^2}{1-\phi^2}
+\left[1+\frac2r\sum_{h=1}^{r-1}(r-h)\phi^h\right].
+\end{align*}
+Define
+\[
+D_r(\phi)=1+\frac2r\sum_{h=1}^{r-1}(r-h)\phi^h.
+\]
+Using the elementary geometric sums gives
+\begin{equation}
+D_r(\phi)
+=\frac{1+\phi}{1-\phi}
+-\frac{2\phi(1-\phi^r)}{r(1-\phi)^2}.
+\label{eq:supp-Dr-closed}
+\end{equation}
+Therefore
+\[
+\Omega_r(\phi)
+=\frac{\sigma_\varepsilon^2}{1-\phi^2}D_r(\phi)
+\]
+and
+\begin{equation*}
+\nu_{N,M}(\phi)=\frac{D_M(\phi)}{D_N(\phi)}.
+\end{equation*}
+Equivalently,
+\begin{equation}
+\Omega_r(\phi)
+=\sigma^2\left\{1-\frac{b_\phi}{r}(1-\phi^r)\right\},
+\qquad
+b_\phi=\frac{2\phi}{1-\phi^2}.
+\label{eq:supp-Omega-longrun}
+\end{equation}
+On compact stability sets,
+\begin{equation}
+\nu_{N,M}(\phi)
+=1-b_\phi\left(\frac1M-\frac1N\right)
++O_\rho\left(M^{-2}+N^{-2}+\frac{\rho^M}{M}\right).
+\label{eq:supp-nu-expansion}
+\end{equation}
+
+\subsection{Strict monotonicity for positive persistence}
+Write
+\[
+D_M(\phi)=\sum_{h=0}^{N-1}a_h\phi^h,
+\qquad
+D_N(\phi)=\sum_{h=0}^{N-1}c_h\phi^h,
+\]
+where
+\[
+a_0=c_0=1,
+\qquad
+a_h=2\left(1-\frac hM\right)\mathbf 1(h<M),
+\qquad
+c_h=2\left(1-\frac hN\right)\mathbf 1(h<N).
+\]
+The full ratio sequence $a_h/c_h$ is nonincreasing, and it is strictly decreasing for $0\le h<M$. Pairing terms therefore gives
+\begin{equation*}
+D_M'D_N-D_MD_N'
+=\sum_{i>j}(i-j)(a_ic_j-a_jc_i)\phi^{i+j-1}<0,
+\qquad 0<\phi<1.
+\end{equation*}
+Hence $D_M/D_N$ is strictly decreasing on $(0,1)$. Since $D_r(0)=1$ and $D_r(1)=r$, the monotonicity, limits, and bounds stated in Section~2 of the main manuscript follow.
+
+\section{Scalar signed-root expansion and AR(1) specialization}
+\label{supp:higher-order}
+This appendix gives the scalar calculation used in the main manuscript. The purpose is to make the higher-order statements checkable directly from the present Supporting Information.
+
+Let
+\[
+Z_{j,N}=\frac{S_{j,M}}{\sqrt{M\Omega_M}},
+\qquad
+A_{r,N}=Q^{-1}\sum_{j=1}^Q Z_{j,N}^r,
+\qquad
+U_N=\sqrt Q\,A_{1,N}.
+\]
+Write
+\[
+V_N=\sqrt Q\,(A_{2,N}-1),
+\qquad
+W_N=Q^{-1/2}\sum_{j=1}^Q\{Z_{j,N}^3-\mu_{3,M}\},
+\qquad
+\mu_{r,M}=E(Z_{1,N}^r),
+\]
+and put
+\[
+\eta_N=M^{-1}+Q^{-1}.
+\]
+The signed empirical-likelihood root is
+\[
+R_N=\operatorname{sgn}(A_{1,N})\sqrt{LR_{N,M}}.
+\]
+All statements in this appendix are uniform on compact stability sets $|\phi|\le\rho<1$.
+
+\subsection{Localization and convex-hull failure}
+\label{supp:localization}
+The Taylor expansion is used on a localization event on which $\max_j|Z_{j,N}|$, $|A_{2,N}-1|$, and $|U_N|$ are controlled. Under the moment and truncation bounds in Section~\ref{supp:conditions}, for every fixed $K$ and a sufficiently large truncation constant $L$,
+\begin{equation}
+P(\mathcal L_N^c)=O(Q^{-K})+O_\rho(Q\rho^{r_N}),
+\qquad r_N=\lceil L\log N\rceil.
+\label{eq:supp-localization-prob}
+\end{equation}
+The scalar convex-hull failure probability satisfies
+\begin{equation}
+P\{0\notin\operatorname{conv}(Z_{1,N},\ldots,Z_{Q,N})\}
+\le Ce^{-cQ}+CQ\rho^M.
+\label{eq:supp-convex-hull-prob}
+\end{equation}
+Both bounds are negligible at the polynomial orders considered below. The localized signed-root sublevel sets have derivative $1+o(1)$ in the leading linear coordinate. The usual Borel-set transfer for the block-variable Edgeworth expansion therefore applies and, for some $a>2$ and fixed $c$,
+\begin{equation}
+\sup_x\omega(\widetilde f_{x,N};Q^{-a})
+\le C Q^{-a}(\log Q)^c=o(Q^{-2}).
+\label{eq:supp-boundary-modulus}
+\end{equation}
+
+\begin{Lemma}[Cross-block cumulant bound]
+\label{lem:supp-cross-block-cumulants}
+For $3\le r\le12$, uniformly on $|\phi|\le\rho<1$,
+\[
+|\operatorname{cum}(Z_{j_1,N},\ldots,Z_{j_r,N})|
+\le
+\begin{cases}
+C_rM^{1-r/2},&j_1=\cdots=j_r,\\
+C_rM^{-r/2}\rho^{M d(j_1,\ldots,j_r)},&\text{otherwise},
+\end{cases}
+\]
+where $d(j_1,\ldots,j_r)=\max\{\max j_\ell-\min j_\ell-1,0\}$. Hence the sum over tuples that are not all equal is $O_\rho(QM^{-r/2})$.
+\end{Lemma}
+
+\begin{proof}
+Write each block sum as a linear form in the independent innovations. A joint cumulant is the innovation cumulant multiplied by the sum of products of the corresponding block weights. If all indices coincide, the $M$ interior innovation positions give order $M$ before standardization. For distinct blocks, only the boundary tails overlap. Each complete intervening block contributes a factor $\rho^M$. Division by $(M\Omega_M)^{r/2}$ gives the displayed orders, and summation over block separation is geometric.
+\end{proof}
+
+The analogous covariance calculation gives
+\begin{equation}
+\operatorname{Cov}(Z_{i,N},Z_{i+h,N})
+=O_\rho\{M^{-1}\rho^{(h-1)M}\},
+\qquad h\ge1.
+\label{eq:supp-cross-block-cov-order}
+\end{equation}
+This is also immediate from the exact covariance formula in Appendix~S4.
+
+\subsection{Signed-root reduction}
+The empirical-likelihood multiplier satisfies
+\[
+Q^{-1}\sum_{j=1}^Q\frac{Z_{j,N}}{1+\lambda_NZ_{j,N}}=0.
+\]
+Writing $t=A_{1,N}$ and $A_r=A_{r,N}$, expansion around $\lambda_N=0$ gives
+\[
+0=t-A_2\lambda_N+A_3\lambda_N^2-A_4\lambda_N^3+O(\lambda_N^4).
+\]
+Polynomial inversion yields
+\[
+\lambda_N
+=
+\frac{t}{A_2}
++\frac{A_3t^2}{A_2^3}
++\left(\frac{2A_3^2}{A_2^5}-\frac{A_4}{A_2^4}\right)t^3
++O(t^4).
+\]
+Substitution in $2\sum_j\log(1+\lambda_NZ_{j,N})$ and taking the signed square root gives
+\begin{align}
+R_N
+={}&
+U_NA_{2,N}^{-1/2}
++\frac{A_{3,N}U_N^2}{3\sqrt Q\,A_{2,N}^{5/2}}
+\notag\\
+&+
+\frac{U_N^3}{Q}
+\left\{
+\frac{4A_{3,N}^2}{9A_{2,N}^{9/2}}
+-\frac{A_{4,N}}{4A_{2,N}^{7/2}}
+\right\}
++\rho_N^{(4)},
+\label{eq:supp-root-empirical-moments}
+\end{align}
+where, on the localization event,
+\[
+|\rho_N^{(4)}|
+\le C|U_N|^4Q^{-3/2}.
+\]
+For the AR(1) linear process,
+\[
+\mu_{3,M}
+=\frac{\gamma_{\varepsilon,3}}{\sqrt M}+O_\rho(M^{-3/2}),
+\qquad
+A_{4,N}=3+o_p(1).
+\]
+Expanding $A_{2,N}=1+Q^{-1/2}V_N$ and
+$A_{3,N}=\mu_{3,M}+Q^{-1/2}W_N$ in
+\eqref{eq:supp-root-empirical-moments} gives
+\begin{align}
+\mathcal R_N
+={}&
+U_N-\frac{U_NV_N}{2\sqrt Q}
++\frac{\gamma_{\varepsilon,3}U_N^2}{3\sqrt N}
+\notag\\
+&+
+\frac1Q
+\left\{
+\frac38U_NV_N^2
++\frac13W_NU_N^2
+-\frac34U_N^3
+\right\}.
+\label{eq:supp-polynomial-root}
+\end{align}
+
+\begin{Proposition}[Polynomial signed-root approximation]
+\label{prop:supp-polynomial-root}
+Under Conditions~(A1), (A3), and (A4) of the main manuscript,
+\[
+R_N=\mathcal R_N+o_p(\eta_N).
+\]
+\end{Proposition}
+
+\begin{proof}
+The first term of \eqref{eq:supp-root-empirical-moments} equals
+\[
+U_N-\frac{U_NV_N}{2\sqrt Q}
++\frac{3U_NV_N^2}{8Q}
++O_p(Q^{-3/2}).
+\]
+The second term equals
+\[
+\frac{\gamma_{\varepsilon,3}U_N^2}{3\sqrt N}
++\frac{W_NU_N^2}{3Q}
++o_p(\eta_N),
+\]
+and the third contributes
+\[
+-\frac{3U_N^3}{4Q}+o_p(\eta_N).
+\]
+The remaining coefficients are $Q^{-3/2}$, $M^{-1/2}Q^{-1}$,
+$M^{-1}Q^{-1/2}$, or smaller and are $o(\eta_N)$. Equation~\eqref{eq:supp-localization-prob} transfers the result from the localization event to the unconditional distribution.
+\end{proof}
+
+\subsection{Leading cumulants and likelihood-ratio expansion}
+The AR(1) partial-sum and block-moment calculations needed for
+\eqref{eq:supp-polynomial-root} are collected next.
+
+\begin{Lemma}[Leading moment inputs]
+\label{lem:supp-leading-moments-ar1}
+Under Conditions~(A1), (A3), and (A4),
+\begin{align}
+E(U_N^2)
+&=
+1+\frac{b_\phi}{M}+o(\eta_N),
+\label{eq:supp-U2}\\
+E(U_N^3)
+&=
+\frac{\gamma_{\varepsilon,3}}{\sqrt N}+o(\eta_N),
+\qquad
+E(U_N^4)
+=
+3+\frac{6b_\phi}{M}+o(\eta_N).
+\label{eq:supp-U34}
+\end{align}
+Moreover,
+\begin{align*}
+E(U_NV_N)
+&=
+\frac{\gamma_{\varepsilon,3}}{\sqrt M}
++O_\rho(M^{-3/2}),
+\\
+E(U_N^2V_N)
+&=
+\frac2{\sqrt Q}
++O_\rho\left(N^{-1/2}+Q^{-3/2}\right),
+\\
+Q^{-1/2}E(U_N^3V_N)
+&=
+\frac{3\gamma_{\varepsilon,3}}{\sqrt N}
++o(\eta_N),
+\\
+Q^{-1/2}E(U_N^4V_N)
+&=
+\frac{12}{Q}+o(\eta_N).
+\end{align*}
+The Gaussian-limit contractions are
+\[
+E(U_N^2V_N^2)\to2,\quad
+E(U_N^4V_N^2)\to6,\quad
+E(W_NU_N^3)\to9,\quad
+E(W_NU_N^5)\to45.
+\]
+\end{Lemma}
+
+\begin{proof}
+Since the blocks tile the sample,
+\[
+U_N=\{N\Omega_M\}^{-1/2}\sum_{t=1}^N(X_t-\mu).
+\]
+Equations~\eqref{eq:supp-Omega-longrun} and \eqref{eq:supp-nu-expansion} give
+$E(U_N^2)=\Omega_N/\Omega_M=1+b_\phi/M+o(\eta_N)$.
+For a linear AR(1) filter, the standardized long-run cumulants equal the standardized innovation cumulants because both numerator and denominator contain the same factor $(1-\phi)^{-r}$. This gives \eqref{eq:supp-U34}. The mixed moments follow by expanding them into joint cumulants of the block sums. Diagonal terms give the displayed iid-Gaussian contractions, while Lemma~\ref{lem:supp-cross-block-cumulants} bounds the off-diagonal remainder. Joint convergence of $(U_N,V_N,W_N)$ to its Gaussian limit and uniform integrability give the final four contractions.
+\end{proof}
+
+\begin{Proposition}[Cumulants of the polynomial root]
+\label{prop:supp-leading-cumulants-ar1}
+Under the same conditions,
+\begin{align}
+\kappa_1(\mathcal R_N)
+&=
+-\frac{\gamma_{\varepsilon,3}}{6\sqrt N}+o(\eta_N),
+\notag\\
+\kappa_2(\mathcal R_N)
+&=
+1+\frac{b_\phi}{M}+\frac{3}{2Q}+o(\eta_N),
+\label{eq:supp-leading-root-cumulants}\\
+\kappa_3(\mathcal R_N)
+&=o(\eta_N),
+\qquad
+\kappa_4(\mathcal R_N)=o(\eta_N).
+\notag
+\end{align}
+\end{Proposition}
+
+\begin{proof}
+For the mean, the terms $-U_NV_N/(2\sqrt Q)$ and
+$\gamma_{\varepsilon,3}U_N^2/(3\sqrt N)$ contribute
+$-\gamma_{\varepsilon,3}/(2\sqrt N)$ and
+$\gamma_{\varepsilon,3}/(3\sqrt N)$.
+For the second cumulant, the $Q^{-1}$ contributions from
+$2E\{U_N(-U_NV_N/2)\}/\sqrt Q$,
+the square of the $Q^{-1/2}$ term, and the $Q^{-1}$ cubic term are
+$-2/Q$, $1/(2Q)$, and $3/Q$. Their sum is $3/(2Q)$. The $b_\phi/M$ term comes from \eqref{eq:supp-U2}.
+
+For the third cumulant, the order-$N^{-1/2}$ contribution of $E(U_N^3)$ is cancelled by the order-$Q^{-1/2}\mu_{3,M}$ part of the nonlinear root. For the fourth cumulant, the order-$M^{-1}$ and order-$Q^{-1}$ parts of $E(\mathcal R_N^4)$ equal those of $3\{E(\mathcal R_N^2)\}^2$. Lemma~\ref{lem:supp-cross-block-cumulants} controls the remaining cross-block terms. Hence the third and fourth cumulants are $o(\eta_N)$.
+\end{proof}
+
+\begin{Theorem}[Leading signed-root and likelihood-ratio expansions]
+\label{thm:supp-leading-expansion-ar1}
+Under Conditions~(A1), (A3), and (A4), uniformly in $x\in\mathbb R$,
+\[
+P(R_N\le x)
+=
+\Phi(x)
++\frac{\gamma_{\varepsilon,3}}{6\sqrt N}\varphi(x)
+-\frac12
+\left\{\frac{b_\phi}{M}+\frac{3}{2Q}\right\}
+x\varphi(x)
++o(\eta_N).
+\]
+Consequently, uniformly in $z\ge0$,
+\begin{equation}
+P\{LR_{N,M}\le z\}
+=G_1(z)-\left\{\frac{b_\phi}{M}+\frac{3}{2Q}\right\}zg_1(z)
++o(M^{-1}+Q^{-1}).
+\label{eq:supp-LR-leading}
+\end{equation}
+\end{Theorem}
+
+\begin{proof}
+Lemma~\ref{lem:supp-knownparam-edgeworth-applicability}, Proposition~\ref{prop:supp-polynomial-root}, and \eqref{eq:supp-leading-root-cumulants} give the scalar Edgeworth expansion of the signed root. Reflection from $R_N$ to $R_N^2=LR_{N,M}$ cancels the $N^{-1/2}$ odd-root contribution and yields \eqref{eq:supp-LR-leading}.
+\end{proof}
+
+Multiplication by $\nu_{N,M}$ removes the $M^{-1}$ term because
+\[
+\nu_{N,M}=1-\frac{b_\phi}{M}+O_\rho(N^{-1}+M^{-2}+\rho^M/M).
+\]
+The additional factor $1-3/(2Q)$ removes the remaining first-order block-count term. Hence
+\[
+LR^{VL}_{N,M}
+=
+\nu_{N,M}\left(1-\frac{3}{2Q}\right)LR_{N,M}
+\]
+satisfies
+\[
+P(LR^{VL}_{N,M}\le z)
+=
+G_1(z)+o(\eta_N).
+\]
+
+\subsection{Second-order rate}
+The stronger bound used in the main paper can also be obtained directly in the AR(1) setting. Define the one-block scalar Bartlett coefficient
+\[
+\beta_M
+=
+\frac12\mu_{4,M}-\frac13\mu_{3,M}^2.
+\]
+The linear-process cumulant calculation gives
+\begin{equation}
+\beta_M
+=
+\frac32+\frac{\kappa_c}{M}+O_\rho(M^{-2}),
+\qquad
+\kappa_c=
+\frac12\gamma_{\varepsilon,4}
+-\frac13\gamma_{\varepsilon,3}^2.
+\label{eq:supp-betaM-expansion}
+\end{equation}
+
+\begin{Lemma}[Second-order dependence bound]
+\label{lem:supp-second-order-ledger-ar1}
+Put $m=M^{-1/2}$ and $q=Q^{-1/2}$. After exact variance calibration, the difference between the cumulants of the dependent scalar root and those of an independent triangular array with the same one-block distribution is
+\[
+O_\rho(m^4+m^2q^2+m^3q)
+=
+O_\rho(m^4+m^2q^2)
+\]
+through the order required for the scalar second-order Edgeworth polynomial.
+\end{Lemma}
+
+\begin{proof}
+Equation~\eqref{eq:supp-cross-block-cov-order} assigns cost $m^2$ to one cross-block covariance. Lemma~\ref{lem:supp-cross-block-cumulants} assigns cost at least $m^r$ to a cross-block cumulant of atomic order $r\ge3$. Expanding a cumulant of products by the Leonov--Shiryaev formula leaves the following possibilities. The all-linear second cumulant contains the unique $m^2$ term, which is removed exactly because
+\[
+\nu_{N,M}\operatorname{Var}(U_N)=1.
+\]
+An all-linear cumulant of order at least three has order at most $m^3q$. A product containing one first nonlinear root term has order at most $m^3q$ or $m^2q^2$. Products with larger excess degree carry at least $q^2$ and one cross-block link, hence are $O(m^2q^2)$. Two or more cross-block covariance links have the conservative envelope $O(m^4)$. These cases exhaust the scalar polynomial through the required order. Finally,
+$2m^3q\le m^4+m^2q^2$.
+
+The $O(m^4)$ term is retained in this conservative uniform bound. No sharper fixed-$C$ cancellation is used in the present manuscript.
+\end{proof}
+
+\begin{Theorem}[Second-order chi-squared rate]
+\label{thm:supp-second-order-ar1}
+Under Conditions~(A1), (A3), and (A4),
+\begin{equation*}
+\sup_{z\ge0}\left|P(LR^{VL}_{N,M}\le z)-G_1(z)\right|
+=
+O_\rho(M^{-2}+N^{-1}+Q^{-2}).
+\end{equation*}
+\end{Theorem}
+
+\begin{proof}
+For an independent triangular array with the same one-block distribution, multiplication by $1-\beta_M/Q$ gives the ordinary scalar Bartlett remainder $O(Q^{-2})$. Lemma~\ref{lem:supp-second-order-ledger-ar1} shows that replacing the independent row by the AR(1) block row after exact variance calibration adds
+$O(M^{-2}+N^{-1})$. Finally,
+\[
+\frac{\beta_M}{Q}-\frac{3}{2Q}
+=
+O(N^{-1})
+\]
+by \eqref{eq:supp-betaM-expansion}, and a deterministic scale perturbation of this order preserves the displayed bound.
+\end{proof}
+
+\section{Scale-invariant Bartlett refinement}
+\label{supp:Bartlett}
+
+\subsection{Gaussian covariance contribution}
+For the full-sample normalization
+\[
+J_i=\Omega_N^{-1/2}\frac{S_{i,M}}{M},\qquad
+\widetilde Z_i=\sqrt M\,J_i,
+\]
+let $G=G_{N,M}(\phi)=\operatorname{Cov}(\widetilde Z_1,\ldots,\widetilde Z_Q)$ and $c_0=G_{11}$. Since the blocks partition the complete sample,
+\[
+\mathbf1^\top G\mathbf1=Q.
+\]
+The matrix is Toeplitz with
+\[
+c_0=\nu_{N,M},\qquad
+c_h^G=c_1^G\phi^{(h-1)M},\quad h\ge1,
+\qquad
+c_1^G=\frac{\phi(1-\phi^M)^2}{M(1-\phi)^2D_N}.
+\]
+Expanding the scalar empirical likelihood through quartic order and applying Isserlis' formula gives the scale-invariant order-$Q^{-1}$ covariance coefficient
+\begin{equation}
+\beta_Q(G)
+=-\frac{2\,\mathbf1^\top G^2\mathbf1}{c_0\,\mathbf1^\top G\mathbf1}
++\frac{2\operatorname{tr}(G^2)}{c_0^2Q}
++\frac{3\,\mathbf1^\top G\mathbf1}{2c_0Q}.
+\label{eq:supp-betaG-full}
+\end{equation}
+Every ratio is unchanged under $G\mapsto s^2G$. The corresponding Gaussian covariance multiplier is
+\[
+B^{G,\mathrm{cov}}_{N,M}=1-\frac{\beta_Q(G_{N,M})}{Q}.
+\]
+At independence $G=I_Q$ and $\beta_Q(G)=3/2$.
+
+On compact stability sets, higher block lags are exponentially small. Put
+\[
+\vartheta_{N,M}(\phi)
+=\frac{\phi(1-\phi^M)^2}{M(1-\phi)^2D_M(\phi)}.
+\]
+The computational Gaussian coefficient used in the main paper is
+\begin{equation}
+a^G_{N,M}
+=M\left\{2-\frac{1}{2\nu_{N,M}}+4\vartheta_{N,M}^2\right\}.
+\label{eq:supp-aG-refined}
+\end{equation}
+Direct summation of the Toeplitz terms in \eqref{eq:supp-betaG-full} gives
+\begin{equation*}
+M\beta_Q(G_{N,M})
+=\frac32M-\frac12b_\phi
++O_\rho(M^{-1}+Q^{-1}+\rho^M).
+\end{equation*}
+Using \eqref{eq:supp-nu-expansion} and
+$\vartheta_{N,M}=O_\rho(M^{-1})$ in \eqref{eq:supp-aG-refined} gives the same
+expansion,
+\begin{equation*}
+a^G_{N,M}=\frac32M-\frac12b_\phi
++O_\rho(M^{-1}+Q^{-1}+\rho^M).
+\end{equation*}
+Consequently,
+\begin{equation}
+M\beta_Q(G_{N,M})-a^G_{N,M}
+=O_\rho(M^{-1}+Q^{-1}+\rho^M).
+\label{eq:supp-betaG-aG-difference}
+\end{equation}
+Thus the two representations have the same stable-interior expansion through the order used to construct the finite-$M$ Bartlett multiplier.
+
+\subsection{Exact one-block innovation-shape terms}
+Write the block sum as $S_M=\sum_{u=-\infty}^M w_M(u)\varepsilon_u$ and define $H_{r,M}=\sum_u w_M(u)^r$. Independence of the innovations gives $\operatorname{cum}_r(S_M)=\kappa_r(\varepsilon_0)H_{r,M}$. For $r=2$,
+\begin{equation*}
+H_{2,M}=\frac{MD_M(\phi)}{1-\phi^2}.
+\end{equation*}
+Let $v=1-\phi^M$, $d=1-\phi$, $G_0=M$, and
+\[
+G_k=\frac{\phi^k(1-\phi^{kM})}{1-\phi^k},\qquad k=1,\ldots,4.
+\]
+Direct summation yields
+\begin{align*}
+H_{3,M}
+&=\frac1{d^3}\left\{\frac{v^3\phi^3}{1-\phi^3}+G_0-3G_1+3G_2-G_3\right\},
+\\
+H_{4,M}
+&=\frac1{d^4}\left\{\frac{v^4\phi^4}{1-\phi^4}+G_0-4G_1+6G_2-4G_3+G_4\right\}.
+\end{align*}
+For $Z_M=S_M/\{\operatorname{Var}(S_M)\}^{1/2}$,
+\[
+\eta_{3,M}=\gamma_{\varepsilon,3}\frac{H_{3,M}}{H_{2,M}^{3/2}},\qquad
+\eta_{4,M}=\mu_{4,M}-3
+=\gamma_{\varepsilon,4}\frac{H_{4,M}}{H_{2,M}^{2}}.
+\]
+The usual scalar empirical-likelihood Bartlett combination is $3/2+\eta_{4,M}/2-\eta_{3,M}^2/3$. Adding its non-Gaussian part to the AR(1) Gaussian covariance coefficient gives
+\begin{equation}
+a^K_{N,M}
+=a^G_{N,M}+M\left\{\frac12\eta_{4,M}-\frac13\eta_{3,M}^2\right\}.
+\label{eq:supp-aK-refined}
+\end{equation}
+Since $H_{r,M}=M(1-\phi)^{-r}+O_\rho(1)$ for $r=2,3,4$,
+\begin{equation}
+a^K_{N,M}
+=\frac32M-\frac12b_\phi
++\frac12\gamma_{\varepsilon,4}-\frac13\gamma_{\varepsilon,3}^2
++O_\rho(M^{-1}+Q^{-1}+\rho^M).
+\label{eq:supp-aK-asymptotic}
+\end{equation}
+Cross-block cumulants of order at least three are smaller by Lemma~\ref{lem:supp-cross-block-cumulants}. They do not change the displayed order-one innovation-shape term.
+
+
+For reference, Figure~\ref{fig:supp-correction-geometry} shows the finite-$(N,M)$ correction multipliers across the stable AR(1) range. It is useful for visualizing the parity-sensitive behavior near the negative boundary, but it is not needed for the asymptotic arguments.
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=0.98\textwidth]{Figure1_correction_geometry_boundary_final.pdf}
+\caption{Correction multipliers across the stability region and near the negative boundary. The blue solid curve is the exact variance calibration factor $\nu_{N,M}(\phi)$, the orange dot-dashed curve is the Gaussian Bartlett refinement $1-a^G_{N,M}(\phi)/N$, and the green dashed curve is their product. Panels (a)--(c) show the full stable range for the three parity regimes, and panels (d)--(f) zoom in near $\phi=-1$.}
+\label{fig:supp-correction-geometry}
+\end{figure}
+
+\section{Two-coordinate limits and boundary calibration}
+\label{supp:boundary}
+The main manuscript uses $x$ for block-scale stability and $Q$ for the number of blocks. Since $M/N=1/Q$, fixed $Q$ also fixes a nonvanishing block fraction. The calculation here is nevertheless finite dimensional because the empirical likelihood contains exactly $Q$ block observations. In the local-boundary cases the AR coefficient also changes with $M$, keeping persistence visible over the block scale.
+
+For observed data, $N$ is fixed and changing $M$ traces a path through $(x,Q)$. The asymptotic regimes below are reference experiments for different parts of that path. They are not block-selection rules. These triangular-array boundary arguments are separate from the stable-interior higher-order conditions used in Appendices~S2--S4. Throughout this section the innovations are iid with mean zero, variance $\sigma_\varepsilon^2\in(0,\infty)$, and
+\[
+E|\varepsilon_0|^{4+\delta}<\infty
+\]
+for some $\delta>0$. No Gaussianity, symmetry, or smooth-density condition is used in the boundary limit theorems.
+All local-boundary limits use the stationary causal initialization inherited from the AR(1) representation. Other local-to-unity initializations generally produce different block covariance limits.
+
+\subsection{Exact block covariance and linear-array Gaussianization}
+For the full-sample normalization used in Appendix~S4, write
+\[
+W_{i,M}=\frac{S_{i,M}(\mu)}{\sqrt{M\Omega_N}},
+\qquad i=1,\ldots,Q.
+\]
+The covariance matrix $G_{N,M}=\operatorname{Cov}(W_{1,M},\ldots,W_{Q,M})$ is Toeplitz with
+\begin{equation}
+c_{0,M}=\nu_{N,M}(\phi)=\frac{D_M(\phi)}{D_N(\phi)},
+\label{eq:supp-c0-exact}
+\end{equation}
+and, for $h\ge1$,
+\begin{equation}
+c_{h,M}=c_{1,M}\phi^{(h-1)M},
+\qquad
+c_{1,M}=\frac{\phi(1-\phi^M)^2}{M(1-\phi)^2D_N(\phi)}.
+\label{eq:supp-ch-exact}
+\end{equation}
+
+These formulas follow directly from the AR(1) covariance function. First,
+\[
+\operatorname{Var}\{S_{i,M}(\mu)\}=M\Omega_M,
+\]
+so division by $M\Omega_N$ gives $c_{0,M}=\Omega_M/\Omega_N=D_M/D_N$. For two blocks $h\ge1$ block positions apart, write the within-block indices as $a,b\in\{1,\ldots,M\}$. Since
+\[
+\operatorname{Cov}(X_t,X_{t+k})=\gamma(0)\phi^{|k|},
+\]
+and $hM+b-a\ge1$,
+\begin{align*}
+\operatorname{Cov}\{S_{i,M}(\mu),S_{i+h,M}(\mu)\}
+&=\gamma(0)\sum_{a=1}^M\sum_{b=1}^M\phi^{hM+b-a}\\
+&=\gamma(0)\phi^{(h-1)M}
+\left(\sum_{a=1}^M\phi^{M-a}\right)
+\left(\sum_{b=1}^M\phi^b\right)\\
+&=\gamma(0)\phi^{(h-1)M}
+\frac{\phi(1-\phi^M)^2}{(1-\phi)^2}.
+\end{align*}
+Because $\Omega_N=\gamma(0)D_N(\phi)$, division by $M\Omega_N$ yields exactly \eqref{eq:supp-ch-exact}. Thus the geometric decay across block lags is inherited directly from the AR(1) factor $\phi^M$.
+Because the blocks partition the complete sample,
+\begin{equation}
+\frac1{\sqrt Q}\sum_{i=1}^QW_{i,M}
+=
+\frac{\sum_{t=1}^N(X_t-\mu)}{\sqrt{N\Omega_N}}.
+\label{eq:supp-exact-mean-identity}
+\end{equation}
+Taking variances gives the exact matrix identity
+\begin{equation}
+\mathbf1^\top G_{N,M}\mathbf1=Q
+\label{eq:supp-exact-G-identity}
+\end{equation}
+for every finite $M$, $Q$, and $\phi\in(-1,1)$. These covariance identities use only the innovation variance. Exact finite-sample normality holds in the Gaussian special case, but it is not needed below.
+
+\begin{Lemma}[Linear-array Gaussianization]
+\label{lem:supp-boundary-linear-clt}
+Under the moment condition stated above, the following assertions hold.
+\begin{enumerate}[label=(\roman*),leftmargin=*]
+\item If $Q$ is fixed and $\phi\in(-1,1)$ is fixed, then
+\[
+(W_{1,M},\ldots,W_{Q,M})^\top\Rightarrow N_Q(0,I_Q).
+\]
+\item If $Q$ is fixed and $\phi_M=1-x/M$ with fixed $x>0$, then
+\[
+(W_{1,M},\ldots,W_{Q,M})^\top\Rightarrow N_Q\{0,\Sigma_+(x)\}.
+\]
+Along a fixed-parity sequence with $\phi_M=-1+x/M$,
+\[
+(W_{1,M},\ldots,W_{Q,M})^\top\Rightarrow N_Q\{0,\Sigma_-(x)\}.
+\]
+\item If $M\to\infty$ and $Q\to\infty$ under either local-boundary sequence, then
+\[
+\frac{\sum_{t=1}^N(X_t-\mu)}{\sqrt{N\Omega_N}}
+=\sqrt Q\,\bar W_Q
+\Rightarrow N(0,1).
+\]
+\end{enumerate}
+\end{Lemma}
+
+\begin{proof}
+Put $\eta_k=\varepsilon_k/\sigma_\varepsilon$. For block $i$, let
+\[
+A_i=(i-1)M+1,
+\qquad
+B_i=iM.
+\]
+The causal representation gives
+\[
+S_{i,M}=\sigma_\varepsilon\sum_{k\in\mathbb Z}d_{i,M,k}\eta_k,
+\]
+where
+\begin{equation}
+d_{i,M,k}
+=
+\begin{cases}
+\displaystyle
+\phi^{A_i-k}\frac{1-\phi^M}{1-\phi},
+& k<A_i,\\[2ex]
+\displaystyle
+\frac{1-\phi^{B_i-k+1}}{1-\phi},
+& A_i\le k\le B_i,\\[2ex]
+0,
+& k>B_i.
+\end{cases}
+\label{eq:supp-block-innovation-coeff}
+\end{equation}
+Hence
+\[
+W_{i,M}
+=
+\sum_{k\in\mathbb Z}a_{i,M,k}\eta_k,
+\qquad
+a_{i,M,k}
+=
+\frac{\sigma_\varepsilon d_{i,M,k}}{\sqrt{M\Omega_N}},
+\qquad
+\sum_k a_{i,M,k}^2=c_{0,M}.
+\]
+
+For fixed $\phi\in(-1,1)$, the coefficients in
+\eqref{eq:supp-block-innovation-coeff} are uniformly bounded and
+$\Omega_N$ converges to the positive long-run variance. On the positive
+local boundary, the geometric sums in
+\eqref{eq:supp-block-innovation-coeff} are $O(M)$ and the exact variance
+formula gives $\Omega_N\asymp_x M^2$. On the negative local boundary,
+the alternating geometric sums are $O(1)$ and
+$\Omega_N\asymp_x1$. The constants in the two local-boundary bounds can
+be chosen uniformly over $Q\ge2$. Therefore
+\begin{equation}
+\max_{i\le Q}\sup_k|a_{i,M,k}|=O(M^{-1/2}).
+\label{eq:supp-max-block-weight}
+\end{equation}
+
+The covariance limits are those obtained from
+\eqref{eq:supp-c0-exact}--\eqref{eq:supp-ch-exact}. For any fixed
+$t\in\mathbb R^Q$, the Cram\'er--Wold combination $t^\top W_M$ has the
+linear representation
+\[
+t^\top W_M=\sum_{k\in\mathbb Z}b_{M,k}\eta_k.
+\]
+Its largest coefficient is $O(M^{-1/2})$, while its variance converges
+to the corresponding quadratic form of the limiting covariance matrix.
+For some $\delta_0\in(0,2+\delta]$,
+\[
+\sum_k|b_{M,k}|^{2+\delta_0}
+\le
+\left(\sup_k|b_{M,k}|\right)^{\delta_0}
+\sum_kb_{M,k}^2
+\longrightarrow0.
+\]
+To make the use of the infinite-past representation explicit, for each
+$M$ choose a finite set $I_M\subset\mathbb Z$ such that
+\[
+\sum_{k\notin I_M}b_{M,k}^2\le M^{-2}.
+\]
+The omitted tail is $o_{L^2}(1)$. The finite array indexed by $I_M$
+satisfies the Lindeberg condition by the preceding infinitesimal-weight
+bound and the $(2+\delta_0)$ moment of $\eta_0$. Lindeberg--Feller
+followed by the $L^2$ tail replacement and Cram\'er--Wold proves
+(i) and (ii).
+
+For the full-sample sum write
+\[
+\frac{\sum_{t=1}^N(X_t-\mu)}{\sqrt{N\Omega_N}}
+=
+\sum_{k\in\mathbb Z}d_{N,k}^\star\eta_k.
+\]
+Its variance is one by definition. The unnormalized coefficient is
+$O(M)$ on the positive boundary and $O(1)$ on the negative boundary.
+Together with $\Omega_N\asymp_x M^2$ and
+$\Omega_N\asymp_x1$, respectively, this gives
+\[
+\sup_k|d_{N,k}^\star|=O(N^{-1/2}).
+\]
+Choose a finite truncation whose omitted squared coefficient mass is
+$o(1)$ and repeat the same Lindeberg--Feller argument. This proves
+(iii).
+\end{proof}
+
+\subsection{Fixed-block many-block benchmark}
+Fix an integer $M\ge1$ and $\phi\in(-1,1)$ while $Q\to\infty$ and
+$N=QM$. From \eqref{eq:supp-Omega-longrun},
+\[
+\Omega_N\longrightarrow\sigma^2,
+\qquad
+\nu_{N,M}(\phi)
+\longrightarrow
+\nu_{\infty,M}(\phi)
+=\frac{\Omega_M(\phi)}{\sigma^2}
+=D_M(\phi)\frac{1-\phi}{1+\phi}.
+\]
+With $W_{i,M}=S_{i,M}(\mu)/\sqrt{M\Omega_N}$, write
+\[
+m_{2,Q}
+=\frac{\Omega_M}{\Omega_N}
+\left\{\frac1Q\sum_{i=1}^Q
+\frac{S_{i,M}(\mu)^2}{M\Omega_M}\right\}.
+\]
+For fixed $M$, the stable AR(1) block sequence is stationary and ergodic, so the term in braces converges in probability to one. Since $\Omega_N\to\sigma^2$,
+\[
+m_{2,Q}\xrightarrow{p}
+\frac{\Omega_M}{\sigma^2}
+=\nu_{\infty,M}(\phi).
+\]
+The exact mean identity \eqref{eq:supp-exact-mean-identity} and the linear-process
+central limit theorem give
+\[
+\sqrt Q\,\bar W_Q
+=\frac{\sum_{t=1}^N(X_t-\mu)}{\sqrt{N\Omega_N}}
+\Rightarrow N(0,1).
+\]
+The $4+\delta$ moment condition implies
+$\max_{1\le i\le Q}|W_{i,M}|=o_p(\sqrt Q)$. Since the nondegenerate centered
+block sum has positive probability on both sides of zero, ergodicity also
+implies that the convex-hull condition holds with probability tending to one.
+The scalar multiplier expansion therefore yields
+\[
+LR_{N,M}(\mu)
+=\frac{Q\bar W_Q^2}{m_{2,Q}}+o_p(1)
+\Rightarrow\nu_{\infty,M}(\phi)^{-1}\chi_1^2.
+\]
+Multiplying by
+$\nu_{N,M}(\phi)\to\nu_{\infty,M}(\phi)$ gives
+\[
+LR^V_{N,M}(\mu,\phi)\Rightarrow\chi_1^2.
+\]
+If $\widehat\phi\xrightarrow{p}\phi$, then with probability tending to one it lies in a compact neighborhood strictly inside $(-1,1)$. The exact variance ratio is locally uniformly continuous there, so
+\[
+\nu_{N,M}(\widehat\phi)-\nu_{N,M}(\phi)\xrightarrow{p}0.
+\]
+Slutsky's theorem therefore gives the same calibrated limit after replacing $\phi$ by $\widehat\phi$. This proves the fixed-block many-block proposition in the main manuscript.
+The argument is first order and does not invoke the stable-interior Edgeworth
+expansion.
+
+\subsection{Interior finite-$Q$ benchmark}
+Fix $Q\ge2$ and $\phi\in(-1,1)$ while $M\to\infty$ and $N=QM$. Since $D_M(\phi)\to(1+\phi)/(1-\phi)$ and the same is true of $D_N(\phi)$,
+\[
+c_{0,M}=\nu_{N,M}(\phi)\longrightarrow1.
+\]
+Moreover $c_{1,M}=O(M^{-1})$ and $|\phi|^M\to0$, so every off-diagonal entry of $G_{N,M}$ tends to zero. Lemma~\ref{lem:supp-boundary-linear-clt}(i) therefore gives the joint Gaussian limit. The scalar empirical-likelihood functional is continuous outside the null boundary of the convex-hull region under this nonsingular Gaussian limit, giving
+\begin{equation}
+LR_{QM,M}(\mu)\Rightarrow\mathcal E_Q(Z_1,\ldots,Z_Q),
+\qquad
+LR^V_{QM,M}(\mu)\Rightarrow\mathcal E_Q(Z_1,\ldots,Z_Q),
+\label{eq:supp-interior-fixedQ}
+\end{equation}
+where the $Z_i$ are independent standard Gaussian variables. Convex-hull failure occurs exactly when all $Z_i$ have the same sign, so its limiting probability is
+\begin{equation*}
+P\{0\notin\operatorname{conv}(Z_1,\ldots,Z_Q)\}=2^{1-Q}.
+\end{equation*}
+This proves the interior finite-$Q$ proposition in the main manuscript.
+
+\subsection{Fixed-$Q$ local variance limits}
+For fixed $r$,
+\begin{equation*}
+D_r(1-\epsilon)
+=r-\frac{r^2-1}{3}\epsilon
++\frac{(r-2)(r-1)(r+1)}{12}\epsilon^2+O(\epsilon^3),
+\end{equation*}
+while
+\begin{equation*}
+D_r(-1+\epsilon)
+=\begin{cases}
+\epsilon-\dfrac{r-2}{4}\epsilon^2+O(\epsilon^3),&r\ \text{even},\\[1ex]
+\dfrac1r+\dfrac{r^2-1}{4r}\epsilon^2+O(\epsilon^3),&r\ \text{odd}.
+\end{cases}
+\end{equation*}
+These follow directly from the finite sum defining $D_r$. In particular, if $M$ is even,
+\[
+\nu_{N,M}(-1+\epsilon)=1+\frac{N-M}{4}\epsilon+O(\epsilon^2),
+\]
+if $M$ is odd and $Q$ is even, $\nu_{N,M}(-1+\epsilon)\sim(M\epsilon)^{-1}$, and if $M$ and $Q$ are both odd, $\nu_{N,M}(-1+)\to Q$.
+
+For $\phi_M=1-x/M$ and fixed $c>0$, along integer values of $M$ for which $cM$ is an integer, the origin of $K_c(x)$ can be read directly from the finite-sum definition of $D_r$. Indeed,
+\begin{align*}
+\frac{D_{cM}(\phi_M)}{M}
+&=\frac1M+\frac2M\sum_{h=1}^{cM-1}
+\left(1-\frac{h}{cM}\right)
+\left(1-\frac{x}{M}\right)^h.
+\end{align*}
+Writing $v=h/M$, the summand converges uniformly over $0\le h\le cM$ to
+$2(1-v/c)e^{-xv}$, because
+$(1-x/M)^h=\exp\{h\log(1-x/M)\}\to e^{-xv}$. Hence the sum is a Riemann sum and
+\begin{align}
+\frac{D_{cM}(\phi_M)}{M}
+&\longrightarrow
+2\int_0^c\left(1-\frac{v}{c}\right)e^{-xv}\,dv \nonumber\\
+&=\frac2x-\frac{2(1-e^{-cx})}{cx^2}
+=:K_c(x).
+\label{eq:supp-Kc-derivation}
+\end{align}
+The same limit follows by direct substitution into the closed form \eqref{eq:supp-Dr-closed}. Taking $c=1$ and $c=Q$ in \eqref{eq:supp-Kc-derivation} therefore gives
+\begin{equation*}
+\nu_{QM,M}(\phi_M)
+=\frac{D_M(\phi_M)/M}{D_{QM}(\phi_M)/M}
+\longrightarrow V_+(x)=\frac{K_1(x)}{K_Q(x)}.
+\end{equation*}
+
+The covariance sequence follows from the exact finite-$M$ formulas \eqref{eq:supp-c0-exact}--\eqref{eq:supp-ch-exact}, rather than being an additional definition. First,
+\[
+c_{0,M}=\frac{D_M(\phi_M)}{D_{QM}(\phi_M)}\longrightarrow
+\frac{K_1(x)}{K_Q(x)}=V_+(x).
+\]
+Next, because $M(1-\phi_M)=x$, $\phi_M^M\to e^{-x}$, and $D_{QM}(\phi_M)/M\to K_Q(x)$,
+\begin{align*}
+c_{1,M}
+&=\frac{\phi_M(1-\phi_M^M)^2}
+{M(1-\phi_M)^2D_{QM}(\phi_M)}\\
+&=\frac{\phi_M(1-\phi_M^M)^2}
+{x^2\{D_{QM}(\phi_M)/M\}}
+\longrightarrow
+\frac{(1-e^{-x})^2}{x^2K_Q(x)}.
+\end{align*}
+Finally,
+\[
+c_{h,M}=c_{1,M}\phi_M^{(h-1)M}
+\longrightarrow
+\frac{(1-e^{-x})^2}{x^2K_Q(x)}e^{-(h-1)x},
+\qquad h\ge1.
+\]
+Thus, writing these covariance limits as
+\begin{equation*}
+u_{0,+}(x)=V_+(x),\qquad
+u_{1,+}(x)=\frac{(1-e^{-x})^2}{x^2K_Q(x)},\qquad
+u_{h,+}(x)=u_{1,+}(x)e^{-(h-1)x},\quad h\ge1.
+\end{equation*}
+shows explicitly that $u_{h,+}(x)=\lim_M\operatorname{Cov}(W_{i,M},W_{i+h,M})$. Let $\Sigma_+(x)$ be the corresponding Toeplitz matrix.
+
+The positive-boundary matrix also has a useful continuous-time representation. Let $J_x$ be stationary Ornstein--Uhlenbeck with
+\[
+\operatorname{Cov}\{J_x(r),J_x(s)\}=\frac{e^{-x|r-s|}}{2x},
+\]
+and define
+\[
+A_{i,Q}(x)=\left\{\frac{2x}{K_Q(x)}\right\}^{1/2}
+\int_{i-1}^{i}J_x(r)\,dr.
+\]
+Direct integration gives
+\begin{align*}
+\operatorname{Var}\{A_{i,Q}(x)\}
+&=\frac{K_1(x)}{K_Q(x)}=V_+(x),\\
+\operatorname{Cov}\{A_{i,Q}(x),A_{i+h,Q}(x)\}
+&=\frac{(1-e^{-x})^2}{x^2K_Q(x)}e^{-(h-1)x}
+=u_{h,+}(x).
+\end{align*}
+Thus $(A_{1,Q}(x),\ldots,A_{Q,Q}(x))^\top\sim N_Q\{0,\Sigma_+(x)\}$. This continuous-time representation gives an alternative interpretation of the positive-boundary covariance structure.
+
+For the negative local sequence $\phi_M=-1+x/M$, the alternating signs make the Riemann-sum representation less convenient, but the closed form \eqref{eq:supp-Dr-closed} gives the limit immediately. Put $s=(-1)^{cM}$ and take $M\to\infty$ along a subsequence on which this parity is fixed. Since
+\[
+\phi_M^{cM}\longrightarrow s e^{-cx},
+\qquad
+1+\phi_M=\frac{x}{M},
+\qquad
+1-\phi_M=2-\frac{x}{M},
+\]
+we have
+\begin{align*}
+M D_{cM}(\phi_M)
+&=\frac{x}{2-x/M}
+-\frac{2\phi_M\{1-\phi_M^{cM}\}}
+{c(2-x/M)^2} \\
+&\longrightarrow
+\frac{x}{2}+\frac{1-se^{-cx}}{2c}
+=\frac12\left\{x+\frac{1-se^{-cx}}{c}\right\}
+=:L_c^{(s)}(x).
+\end{align*}
+Taking $c=1$ and $c=Q$ yields
+\begin{equation*}
+\nu_{QM,M}(\phi_M)
+=\frac{M D_M(\phi_M)}{M D_{QM}(\phi_M)}
+\longrightarrow
+V_-(x)=\frac{L_1^{((-1)^M)}(x)}{L_Q^{((-1)^N)}(x)}.
+\end{equation*}
+
+The negative-boundary covariance sequence follows from the same exact formulas. Let
+$s_M=(-1)^M$, $s_N=(-1)^N$, and $\theta=s_Me^{-x}$. Then
+\[
+c_{0,M}\longrightarrow V_-(x),
+\qquad
+\phi_M^M\longrightarrow s_Me^{-x}=\theta,
+\]
+and, using $M D_{QM}(\phi_M)\to L_Q^{(s_N)}(x)$,
+\begin{align*}
+c_{1,M}
+&=\frac{\phi_M(1-\phi_M^M)^2}
+{M(1-\phi_M)^2D_{QM}(\phi_M)}\\
+&\longrightarrow
+-\frac{(1-s_Me^{-x})^2}{4L_Q^{(s_N)}(x)}.
+\end{align*}
+Therefore
+\[
+c_{h,M}=c_{1,M}\phi_M^{(h-1)M}
+\longrightarrow
+-\frac{(1-s_Me^{-x})^2}{4L_Q^{(s_N)}(x)}\,
+\theta^{h-1}.
+\]
+Writing
+\begin{equation*}
+u_0=V_-(x),\qquad
+u_1=-\frac{(1-s_Me^{-x})^2}{4L_Q^{(s_N)}(x)},\qquad
+u_h=u_1\theta^{h-1},\quad h\ge1.
+\end{equation*}
+again makes explicit that $u_h=\lim_M\operatorname{Cov}(W_{i,M},W_{i+h,M})$. Let $\Sigma_-(x)$ be the Toeplitz matrix generated by this sequence.
+
+\subsection{Many-block local-boundary limit}
+We now let $Q=Q_M\to\infty$ together with $M\to\infty$. No additional relative rate between $M$ and $Q$ is needed for the linear-array argument below.
+
+On the positive boundary, let $\phi_M=1-x/M$ with fixed $x>0$. The exact form of $D_r$ gives
+\begin{equation*}
+\frac{D_M(\phi_M)}{M}\longrightarrow
+K_1(x),
+\qquad
+\frac{D_{QM}(\phi_M)}{M}\longrightarrow\frac2x.
+\end{equation*}
+Consequently
+\begin{equation}
+c_{0,M}\longrightarrow
+v_+(x)=1-\frac{1-e^{-x}}{x},
+\label{eq:supp-manyQ-vplus}
+\end{equation}
+while
+\begin{equation*}
+c_{1,M}\longrightarrow
+\frac{(1-e^{-x})^2}{2x},
+\qquad
+\phi_M^M\longrightarrow e^{-x}.
+\end{equation*}
+The limiting block-index covariance sequence therefore satisfies
+\begin{equation*}
+v_+(x)
++2\sum_{h=1}^{\infty}
+\frac{(1-e^{-x})^2}{2x}e^{-(h-1)x}
+=1.
+\end{equation*}
+This identity is the local-boundary limit of the exact relation \eqref{eq:supp-exact-G-identity}, not a separate normalization.
+
+On the negative boundary, take $\phi_M=-1+x/M$ along a subsequence with $s=(-1)^M$ fixed. Then
+\begin{equation*}
+MD_M(\phi_M)\longrightarrow
+\frac12\{x+1-se^{-x}\},
+\qquad
+MD_{QM}(\phi_M)\longrightarrow\frac x2,
+\end{equation*}
+where the second relation uses $|\phi_M|^{QM}\to0$ because $Q\to\infty$. Hence
+\begin{equation}
+c_{0,M}\longrightarrow
+v_-^{(s)}(x)=1+\frac{1-se^{-x}}{x},
+\label{eq:supp-manyQ-vminus}
+\end{equation}
+and
+\begin{equation*}
+c_{1,M}\longrightarrow
+-\frac{(1-se^{-x})^2}{2x},
+\qquad
+\phi_M^M\longrightarrow se^{-x}.
+\end{equation*}
+Again the limiting long-run variance across the block index is one,
+\begin{equation*}
+v_-^{(s)}(x)
+-2\sum_{h=1}^{\infty}
+\frac{(1-se^{-x})^2}{2x}(se^{-x})^{h-1}
+=1.
+\end{equation*}
+This is likewise the corresponding limit of \eqref{eq:supp-exact-G-identity}.
+
+It remains to transfer these covariance limits to empirical likelihood. Put
+\[
+\bar W_Q=Q^{-1}\sum_{i=1}^QW_{i,M},
+\qquad
+m_{2,Q}=Q^{-1}\sum_{i=1}^QW_{i,M}^2.
+\]
+Lemma~\ref{lem:supp-boundary-linear-clt}(iii) and \eqref{eq:supp-exact-mean-identity} give
+\begin{equation}
+\sqrt Q\,\bar W_Q\Rightarrow N(0,1).
+\label{eq:supp-manyQ-exact-normal}
+\end{equation}
+Also
+\[
+E(m_{2,Q})=c_{0,M}=\nu_{N,M}
+\]
+exactly. To control its variance, use the linear representation from Lemma~\ref{lem:supp-boundary-linear-clt}. Write $\kappa_{\varepsilon,4}=E(\eta_0^4)-3$. Independence of the innovations gives
+\begin{equation}
+\operatorname{Cov}(W_{i,M}^2,W_{j,M}^2)
+=2c_{|i-j|,M}^2
++\kappa_{\varepsilon,4}\sum_k a_{i,M,k}^2a_{j,M,k}^2.
+\label{eq:supp-square-cov-nongaussian}
+\end{equation}
+By \eqref{eq:supp-max-block-weight}, boundedness of $c_{0,M}$ implies
+\[
+\left|\sum_k a_{i,M,k}^2a_{j,M,k}^2\right|
+\le \left(\sup_k a_{i,M,k}^2\right)\sum_k a_{j,M,k}^2
+\le \frac{C_x}{M}.
+\]
+Let $\theta_M=\phi_M^M$. For fixed $x>0$, the covariance limits imply that, for all sufficiently large $M$, $|\theta_M|\le r_x<1$ and $c_{0,M},c_{1,M}$ are bounded. Hence \eqref{eq:supp-ch-exact} gives $\operatorname{tr}(G_{N,M}^2)=O(Q)$, and summing \eqref{eq:supp-square-cov-nongaussian} yields
+\begin{equation*}
+\operatorname{Var}(m_{2,Q})
+=O(Q^{-1}+M^{-1})=o(1).
+\end{equation*}
+Since $\nu_{N,M}$ is bounded away from zero for fixed $x>0$ in both boundary regimes,
+\begin{equation}
+\frac{m_{2,Q}}{\nu_{N,M}}\xrightarrow{p}1.
+\label{eq:supp-manyQ-m2-ratio}
+\end{equation}
+Together with \eqref{eq:supp-manyQ-vplus} and \eqref{eq:supp-manyQ-vminus}, this also gives
+\begin{equation*}
+m_{2,Q}\xrightarrow{p}v_+(x)
+\quad\text{or, along a fixed-parity negative subsequence,}\quad
+m_{2,Q}\xrightarrow{p}v_-^{(s)}(x).
+\end{equation*}
+
+\begin{Lemma}[Convex-hull containment on the local boundary]
+\label{lem:supp-manyQ-hull}
+Under either local-boundary sequence with fixed $x>0$ and $Q\to\infty$,
+\[
+P\{0\notin\mathrm{int}\,\mathrm{conv}\{W_{1,M},\ldots,W_{Q,M}\}\}\longrightarrow0.
+\]
+\end{Lemma}
+
+\begin{proof}
+The linear representation and \eqref{eq:supp-max-block-weight} give a uniform fourth-moment bound,
+\[
+\sup_{M,i}E|W_{i,M}|^4<\infty.
+\]
+Consequently, for every $\epsilon>0$,
+\[
+P\left(\max_{1\le i\le Q}|W_{i,M}|>\epsilon\sqrt Q\right)
+\le
+\frac{Q\sup_iE|W_{i,M}|^4}{\epsilon^4Q^2}
+\longrightarrow0,
+\]
+so $\max_i|W_{i,M}|=o_p(\sqrt Q)$. By \eqref{eq:supp-manyQ-exact-normal}, $\sqrt Q\,\bar W_Q=O_p(1)$, while \eqref{eq:supp-manyQ-m2-ratio} and the positive lower bound for $\nu_{N,M}$ give $m_{2,Q}$ bounded away from zero with probability tending to one.
+
+If the scalar convex hull does not contain zero in its interior, all $W_{i,M}$ have the same weak sign. On that event,
+\[
+m_{2,Q}
+=\frac1Q\sum_iW_{i,M}^2
+\le
+\max_i|W_{i,M}|\,\frac1Q\sum_i|W_{i,M}|
+=\max_i|W_{i,M}|\,|\bar W_Q|.
+\]
+The right-hand side equals
+\[
+\left(\frac{\max_i|W_{i,M}|}{\sqrt Q}\right)
+\left(\sqrt Q|\bar W_Q|\right)=o_p(1),
+\]
+which contradicts the positive probability limit of $m_{2,Q}$. Therefore the convex-hull failure probability tends to zero.
+\end{proof}
+
+The fourth-moment bound used in Lemma~\ref{lem:supp-manyQ-hull} gives
+\[
+\max_{1\le i\le Q}|W_{i,M}|=o_p(\sqrt Q).
+\]
+It also implies $\sup_{M,i}E|W_{i,M}|^3<\infty$, so Markov's inequality gives
+\[
+Q^{-1}\sum_{i=1}^Q|W_{i,M}|^3=O_p(1).
+\]
+On the convex-hull event let $\lambda_Q$ solve
+\[
+\sum_{i=1}^Q\frac{W_{i,M}}{1+\lambda_QW_{i,M}}=0.
+\]
+The estimating equation can be written exactly as
+\begin{equation*}
+\lambda_Q A_Q(\lambda_Q)=\bar W_Q,
+\qquad
+A_Q(\lambda)
+=
+\frac1Q\sum_{i=1}^Q\frac{W_{i,M}^2}{1+\lambda W_{i,M}}.
+\end{equation*}
+The root has the same sign as $\bar W_Q$. Since all denominators are
+positive at the empirical-likelihood solution,
+\[
+A_Q(\lambda_Q)
+\ge
+\frac{m_{2,Q}}{1+|\lambda_Q|\max_i|W_{i,M}|}.
+\]
+It follows that
+\[
+|\lambda_Q|
+\left\{
+m_{2,Q}-|\bar W_Q|\max_i|W_{i,M}|
+\right\}
+\le
+|\bar W_Q|.
+\]
+Now
+\[
+|\bar W_Q|\max_i|W_{i,M}|
+=
+\left(\sqrt Q|\bar W_Q|\right)
+\left\{\frac{\max_i|W_{i,M}|}{\sqrt Q}\right\}
+=o_p(1),
+\]
+while $m_{2,Q}$ is bounded away from zero with probability tending to
+one. Hence
+\[
+\lambda_Q=O_p(Q^{-1/2}),
+\qquad
+\max_i|\lambda_QW_{i,M}|=o_p(1).
+\]
+Expanding the estimating equation gives
+\[
+0
+=
+\bar W_Q-\lambda_Qm_{2,Q}
++\lambda_Q^2R_{3,Q}(\lambda_Q),
+\]
+where
+\[
+R_{3,Q}(\lambda)
+=
+\frac1Q\sum_{i=1}^Q
+\frac{W_{i,M}^3}{1+\lambda W_{i,M}}
+=
+O_p(1)
+\]
+at $\lambda=\lambda_Q$. Therefore
+\begin{equation}
+\lambda_Q
+=
+\frac{\bar W_Q}{m_{2,Q}}
++
+O_p(Q^{-1}).
+\label{eq:supp-manyQ-lambda-expansion}
+\end{equation}
+Finally,
+\[
+LR_{N,M}(\mu)
+=
+2Q\left\{
+\lambda_Q\bar W_Q-\frac12\lambda_Q^2m_{2,Q}
+\right\}
++
+O_p\left(
+Q|\lambda_Q|^3
+\frac1Q\sum_i|W_{i,M}|^3
+\right).
+\]
+The remainder is $O_p(Q^{-1/2})$, and substitution of
+\eqref{eq:supp-manyQ-lambda-expansion} gives
+\begin{equation}
+LR_{N,M}(\mu)
+=\frac{Q\bar W_Q^2}{m_{2,Q}}+o_p(1).
+\label{eq:supp-manyQ-el-expansion}
+\end{equation}
+Combining \eqref{eq:supp-manyQ-exact-normal}, \eqref{eq:supp-manyQ-m2-ratio}, and \eqref{eq:supp-manyQ-el-expansion} yields
+\begin{equation*}
+LR^V_{N,M}(\mu)
+=\frac{Q\bar W_Q^2}{m_{2,Q}/\nu_{N,M}}+o_p(1)
+\Rightarrow\chi_1^2.
+\end{equation*}
+This conclusion holds on the negative boundary without restricting to a fixed-parity subsequence. The subsequence is needed only to identify the raw scale. On the positive boundary $\nu_{N,M}\to v_+(x)$, so
+\[
+LR_{N,M}(\mu)\Rightarrow v_+(x)^{-1}\chi_1^2.
+\]
+On a negative fixed-parity subsequence $\nu_{N,M}\to v_-^{(s)}(x)$, so
+\[
+LR_{N,M}(\mu)\Rightarrow\{v_-^{(s)}(x)\}^{-1}\chi_1^2.
+\]
+This proves the many-block boundary theorem in the main manuscript.
+
+For the feasible version, let $\widehat\phi_M$ satisfy
+$M(\widehat\phi_M-\phi_M)=o_p(1)$. On the positive boundary write
+$\widehat x_M=M(1-\widehat\phi_M)$. Then
+$\widehat x_M=x+o_p(1)$. The closed form for $D_r$ implies, locally
+uniformly for $y$ in compact subsets of $(0,\infty)$,
+\[
+\nu_{N,M}(1-y/M)\longrightarrow v_+(y).
+\]
+Hence
+\[
+\frac{\nu_{N,M}(\widehat\phi_M)}
+{\nu_{N,M}(\phi_M)}
+\xrightarrow{p}1.
+\]
+The same argument applies near $-1$ along each parity subsequence, using
+the corresponding locally uniform limit $v_-^{(s)}(y)$. Since the oracle
+variance-calibrated statistic converges to $\chi_1^2$, Slutsky's theorem
+proves the feasible many-block corollary in the main manuscript. The statement holds along
+the full negative sequence because every subsequence contains a further
+fixed-parity subsequence with the same calibrated limit.
+
+\subsection{Negative-boundary covariance continuation}
+The full Gaussian covariance functional \eqref{eq:supp-betaG-full} has the fixed-$Q$ continuation
+\begin{equation*}
+\beta_-^{\mathrm{cov}}(x)
+=-\frac{2\mathbf1^\top\Sigma_-^2\mathbf1}{u_0Q}
++\frac{2\operatorname{tr}(\Sigma_-^2)}{u_0^2Q}
++\frac{3}{2u_0}.
+\end{equation*}
+Set $B_-^{\mathrm{cov}}=1-\beta_-^{\mathrm{cov}}/Q$. Since $N=QM$, only three parity configurations are possible. As $x\downarrow0$,
+\[
+\begin{array}{c|ccc}
+&V_-(x)&\beta_-^{\mathrm{cov}}(x)&B_-^{\mathrm{cov}}(x)\\ \hline
+M\ \mathrm{even}&1&3/2&1-3/(2Q)\\
+M\ \mathrm{odd},\ Q\ \mathrm{even}&x^{-1}&2Q&-1\\
+M,Q\ \mathrm{odd}&Q&3/(2Q)&1-3/(2Q^2).
+\end{array}
+\]
+Thus the odd-$M$, even-$Q$ continuation changes sign near the boundary. This is only a property of the continued covariance functional. With fixed $Q$ it is not a Bartlett correction restoring a chi-squared law.
+
+\subsection{Positive definiteness and the finite-$Q$ boundary law}
+In either boundary regime the limiting covariance sequence has the form
+\[
+\Sigma_{ii}=u_0,
+\qquad
+\Sigma_{i,i+h}=u_1\theta^{h-1},
+\qquad |\theta|<1.
+\]
+Its spectral density is proportional to
+\[
+f(\lambda)=u_0+2u_1\frac{\cos\lambda-\theta}{1-2\theta\cos\lambda+\theta^2}.
+\]
+The numerator is linear in $\cos\lambda$, so positivity reduces to its two endpoint values. For the positive boundary, the nontrivial endpoint inequality is
+\[
+x(1+e^{-x})-2(1-e^{-x})>0,
+\]
+which is equivalent to $x>2\tanh(x/2)$ and holds for every $x>0$. For the negative boundary, one endpoint simplifies to the positive quantity
+\[
+\frac{(1-\theta)^2x}{2L_Q^{(s_N)}(x)},
+\]
+while the other is a positive multiple of
+\[
+L_1^{((-1)^M)}(x)(1+\theta)+\frac{(1-\theta)^2}{2}.
+\]
+Hence the spectral density is bounded below by a positive constant. The spectral representation then implies that every finite Toeplitz section, in particular $\Sigma_+(x)$ and $\Sigma_-(x)$, is strictly positive definite.
+
+Under the full-sample normalization,
+\[
+W_M=(W_{1,M},\ldots,W_{Q,M})^\top,
+\]
+Lemma~\ref{lem:supp-boundary-linear-clt}(ii) and the covariance limits above give
+\[
+W_M\Rightarrow Z_+(x)\sim N_Q\{0,\Sigma_+(x)\}
+\]
+on the positive boundary and
+\[
+W_M\Rightarrow Z_-(x)\sim N_Q\{0,\Sigma_-(x)\}
+\]
+along each fixed-parity negative subsequence.
+
+Let $\mathcal E_Q$ denote the scalar empirical-likelihood functional
+\[
+\mathcal E_Q(z)=
+\begin{cases}
+2\sum_{i=1}^Q\log(1+\lambda z_i),&\min_i z_i<0<\max_i z_i,\\
++\infty,&\text{otherwise},
+\end{cases}
+\]
+where $\lambda$ solves $\sum_i z_i/(1+\lambda z_i)=0$. Its discontinuity boundary has probability zero under the nonsingular Gaussian limit. The continuous mapping theorem therefore gives
+\begin{equation}
+LR_{QM,M}\Rightarrow\mathcal E_Q\{Z_\pm(x)\},
+\qquad
+LR^V_{QM,M}\Rightarrow V_\pm(x)\mathcal E_Q\{Z_\pm(x)\}.
+\label{eq:supp-fixedQ-laws}
+\end{equation}
+This proves the fixed-$Q$ boundary theorem in the main manuscript.
+
+As $x\to\infty$, $V_\pm(x)\to1$, the off-diagonal covariance entries vanish, and $\Sigma_\pm(x)\to I_Q$. Hence the local-boundary family continuously recovers the interior finite-$Q$ benchmark in \eqref{eq:supp-interior-fixedQ}.
+
+The other connection between cells follows from the same exact normalization. For each fixed $Q$ and $x>0$, taking the fixed-$Q$ local-boundary limit in \eqref{eq:supp-exact-G-identity} gives
+\begin{equation}
+\mathbf1^\top\Sigma_{\pm,Q}(x)\mathbf1=Q.
+\label{eq:supp-boundary-Sigma-identity}
+\end{equation}
+Now let $Q\to\infty$ within this family of Gaussian limit laws and write
+\[
+Z_{Q}=(Z_{1,Q},\ldots,Z_{Q,Q})^\top\sim N_Q\{0,\Sigma_{\pm,Q}(x)\}.
+\]
+Equation~\eqref{eq:supp-boundary-Sigma-identity} gives $\sqrt Q\,\bar Z_Q\sim N(0,1)$ exactly. The diagonal variance is $V_{\pm,Q}(x)$ and converges to $v_+(x)$ or the corresponding parity-specific $v_-^{(s)}(x)$. The geometric covariance formulas imply, by the same Isserlis argument used above,
+\[
+\frac{Q^{-1}\sum_{i=1}^QZ_{i,Q}^2}{V_{\pm,Q}(x)}\xrightarrow{p}1.
+\]
+The indicator argument in Lemma~\ref{lem:supp-manyQ-hull} gives convex-hull containment with probability tending to one, and the same scalar empirical-likelihood expansion therefore yields
+\begin{equation*}
+V_{\pm,Q}(x)\,\mathcal E_Q\{Z_Q\}
+\Rightarrow\chi_1^2.
+\end{equation*}
+Thus taking the fixed-$Q$ boundary limit first and then sending $Q\to\infty$ agrees with the direct many-block boundary limit in the main manuscript. This proves the compatibility statement used there.
+
+\subsection{Boundary critical values}
+For $s\in\{+,-\}$ define
+\[
+T_{s,Q}(x)=V_s(x)\mathcal E_Q\{Z_s(x)\},
+\qquad
+F_{s,Q,x}(t)=P\{T_{s,Q}(x)\le t\},
+\]
+and $\pi_{s,Q}(x)=P\{T_{s,Q}(x)=+\infty\}$. If $\pi_{s,Q}(x)<\alpha$, then $\lim_{t\to\infty}F_{s,Q,x}(t)=1-\pi_{s,Q}(x)>1-\alpha$, so
+\[
+c_{s,1-\alpha}(x,Q)=\inf\{t:F_{s,Q,x}(t)\ge1-\alpha\}
+\]
+is finite. At a continuity point of $F_{s,Q,x}$, \eqref{eq:supp-fixedQ-laws} gives asymptotic rejection probability $\alpha$ when this critical value is used. If $\pi_{s,Q}(x)>\alpha$, convex-hull failure alone has limiting probability above $\alpha$. Because ordinary BEL assigns $+\infty$ on that event, no finite nonrandomized level-$\alpha$ cutoff is then available. The required quantiles are obtained directly by Monte Carlo simulation from the explicit $V_s(x)$ and $\Sigma_s(x)$.
+
+\section{Plug-in correction with estimated parameters}
+\label{supp:plugin}
+
+\subsection{Burg linearization}
+The estimator follows the Burg construction \citep{Burg:1968}. The transformed
+version used in the main manuscript is motivated by the first-order unknown-mean
+AR(1) bias calculation of \citet{Zhang.McLeod:2006}. Let $Y_t=X_t-\mu$ and define
+\[
+\psi_t(\phi)=2Y_tY_{t-1}-\phi(Y_t^2+Y_{t-1}^2).
+\]
+The AR(1) identity $Y_t=\phi Y_{t-1}+\varepsilon_t$ gives
+\[
+\psi_t(\phi)-2\varepsilon_tY_{t-1}=-\phi(Y_t^2-Y_{t-1}^2),
+\]
+so the remainder telescopes after summation. Centering by the sample mean contributes only $O_p(1)$ to the numerator, and hence
+\begin{equation}
+\widehat\phi_B-\phi
+=\frac1{N\gamma(0)}\sum_{t=2}^N\varepsilon_tY_{t-1}+O_p(N^{-1}).
+\label{eq:supp-burg-linearization}
+\end{equation}
+The leading terms are martingale differences. Thus $\sqrt N(\widehat\phi_B-\phi)\Rightarrow N(0,1-\phi^2)$. The bias-reduced transform differs from $\widehat\phi_B$ by $O_p(N^{-1})$, and the compact-stability projection is asymptotically inactive, so $\widetilde\phi-\phi=O_p(N^{-1/2})$.
+
+\subsection{Many-block local-boundary rate for Burg}
+Consider either local sequence
+\[
+\phi_M=1-\frac{x}{M}
+\qquad\text{or}\qquad
+\phi_M=-1+\frac{x}{M},
+\]
+with fixed $x>0$, $M\to\infty$, $Q\to\infty$, and $N=MQ$.
+Let $\widehat\phi_B^{\,0}$ denote the Burg estimator formed with the true
+mean. The identity above gives
+\[
+2\sum_{t=2}^NY_tY_{t-1}
+-\phi_M\sum_{t=2}^N(Y_t^2+Y_{t-1}^2)
+=
+2\sum_{t=2}^N\varepsilon_tY_{t-1}
+-\phi_M(Y_N^2-Y_1^2).
+\]
+Let
+\[
+B_N^0=\sum_{t=2}^N(Y_t^2+Y_{t-1}^2).
+\]
+The denominator concentration can be checked directly. For $h\ge0$,
+independence of the innovations gives
+\[
+\operatorname{Cov}(Y_0^2,Y_h^2)
+=
+2\gamma(0)^2\phi_M^{2h}
++
+\operatorname{cum}_4(\varepsilon_0)
+\frac{\phi_M^{2h}}{1-\phi_M^4}.
+\]
+Under either local sequence, $\gamma(0)\asymp_x M$ and
+$\sum_{h\ge0}|\phi_M|^{2h}=O_x(M)$. Hence
+\[
+\operatorname{Var}\left(\sum_{t=1}^NY_t^2\right)=O_x(NM^3),
+\]
+while
+\[
+\left\{E\left(\sum_{t=1}^NY_t^2\right)\right\}^2
+\asymp_x N^2M^2.
+\]
+The relative variance is therefore $O(M/N)=O(Q^{-1})$. Since the two endpoint squares are $O_p(M)$, it follows that
+\[
+\frac{B_N^0}{2N\gamma(0)}\xrightarrow{p}1.
+\]
+Moreover, $\varepsilon_tY_{t-1}$ is a martingale difference and
+\[
+\operatorname{Var}\left(\sum_{t=2}^N\varepsilon_tY_{t-1}\right)
+=
+(N-1)\sigma_\varepsilon^2\gamma(0).
+\]
+Thus the martingale term is $O_p(M\sqrt Q)$. The endpoint term is
+$O_p(M)$, and $B_N^0\asymp_p M^2Q$. Consequently
+\[
+M(\widehat\phi_B^{\,0}-\phi_M)=O_p(Q^{-1/2}).
+\]
+
+It remains to replace the true mean by $\bar X_N$. Put
+$c_N=\bar X_N-\mu$ and let $A_N^0,B_N^0$ denote the true-mean Burg
+numerator and denominator, while $A_N^c,B_N^c$ denote their sample-mean
+counterparts. Direct expansion gives the exact identities
+\[
+A_N^c-A_N^0
+=
+B_N^c-B_N^0
+=
+2c_N(Y_1+Y_N)-2(N+1)c_N^2
+\]
+and
+\[
+(A_N^c-\phi_MB_N^c)-(A_N^0-\phi_MB_N^0)
+=
+2(1-\phi_M)
+\{c_N(Y_1+Y_N)-(N+1)c_N^2\}.
+\]
+Writing $R_N^0=A_N^0-\phi_MB_N^0$ and
+$R_N^c=A_N^c-\phi_MB_N^c$, we have
+\[
+\widehat\phi_B-\widehat\phi_B^{\,0}
+=
+\frac{R_N^c-R_N^0}{B_N^c}
++
+R_N^0\left(\frac1{B_N^c}-\frac1{B_N^0}\right).
+\]
+On the positive boundary, $\Omega_N\asymp_x M^2$, so
+$c_N^2=O_p(M/Q)$ and $Y_1^2+Y_N^2=O_p(M)$. The score correction above is therefore $O_p(M)$, while
+$B_N^c-B_N^0=O_p(M^2)$ and $B_N^0\asymp_p M^2Q$. Combining these bounds with the true-mean rate yields
+\[
+M(\widehat\phi_B-\widehat\phi_B^{\,0})=O_p(Q^{-1}).
+\]
+On the negative boundary, $\Omega_N\asymp_x1$, so
+$c_N^2=O_p((MQ)^{-1})$. The same identities give a score correction
+$O_p(1)$ and $B_N^c-B_N^0=O_p(1)$, hence
+\[
+M(\widehat\phi_B-\widehat\phi_B^{\,0})
+=O_p((MQ)^{-1})=o_p(Q^{-1/2}).
+\]
+Therefore, on either boundary,
+\[
+M(\widehat\phi_B-\phi_M)=O_p(Q^{-1/2}).
+\]
+A fixed projection onto $[-\rho_*,\rho_*]$ is not used in this boundary
+argument because it would eventually bind.
+
+\subsection{Residual moments and correction factors}
+The fitted residual satisfies
+\[
+\widehat\varepsilon_t-\varepsilon_t
+=-(\widetilde\phi-\phi)Y_{t-1}-(1-\widetilde\phi)(\bar X_N-\mu).
+\]
+Under the moment assumptions of the main manuscript, the centered residual moments through order four are root-$N$ consistent. Therefore
+\[
+\widehat\gamma_{\varepsilon,j}-\gamma_{\varepsilon,j}=O_p(N^{-1/2}),\qquad j=3,4.
+\]
+Differentiating \eqref{eq:supp-nu-expansion} and using \eqref{eq:supp-burg-linearization} gives
+\begin{equation*}
+\widehat\nu_{N,M}-\nu_{N,M}=O_p\{(M\sqrt N)^{-1}\}.
+\end{equation*}
+After the leading $3M/2$ term is removed, the derivative of $a^K_{N,M}$ is bounded on compact stability sets, so
+\begin{equation*}
+\widehat a^K_{N,M}-a^K_{N,M}=O_p(N^{-1/2}).
+\end{equation*}
+Thus nuisance estimation does not affect the leading $M^{-1}$ and $Q^{-1}$ correction. This is the level of plug-in accuracy used in the main manuscript. No sharp order-$N^{-1}$ distributional expansion is claimed for the feasible statistic.
+
+\section{Dynamic misspecification}
+\label{supp:misspec}
+For a stationary process with autocovariance $\gamma(h)$,
+\[
+\Omega_r=\gamma(0)+2\sum_{h=1}^{r-1}\left(1-\frac hr\right)\gamma(h).
+\]
+Let
+\[
+\sigma^2=\sum_{h\in\mathbb Z}\gamma(h),
+\qquad
+B_2=2\sum_{h\ge1}h\gamma(h),
+\qquad
+b=\frac{B_2}{\sigma^2}.
+\]
+Then
+\[
+\Omega_r-\left(\sigma^2-\frac{B_2}{r}\right)
+=2\sum_{h=r}^\infty\left(\frac hr-1\right)\gamma(h).
+\]
+If $\sum h^2|\gamma(h)|<\infty$, the remainder is $o(r^{-2})$. Hence
+\begin{equation}
+\Omega_r=\sigma^2-\frac{b\sigma^2}{r}+o(r^{-2}).
+\label{eq:supp-general-Omega}
+\end{equation}
+
+The least-squares AR(1) projection coefficient is
+\[
+\phi^\dagger=\frac{\gamma(1)}{\gamma(0)}.
+\]
+The pseudo-innovation variance is $\gamma(0)\{1-(\phi^\dagger)^2\}$, so the implied AR(1) long-run variance is
+\begin{equation*}
+\sigma^2_{\mathrm{AR},\dagger}
+=\gamma(0)\frac{1+\phi^\dagger}{1-\phi^\dagger}.
+\end{equation*}
+This gives the scaled chi-squared limit for AR-Wald by Slutsky's theorem.
+
+The fitted AR(1) variance factor has coefficient
+\[
+b_{\mathrm{AR}}^\dagger=\frac{2\phi^\dagger}{1-(\phi^\dagger)^2}.
+\]
+Comparing its expansion with \eqref{eq:supp-general-Omega} gives
+\begin{equation*}
+\nu_{N,M}(\phi^\dagger)-\frac{\Omega_M}{\Omega_N}
+=(b-b_{\mathrm{AR}}^\dagger)\left(\frac1M-\frac1N\right)+o(M^{-1}).
+\end{equation*}
+If the raw BEL expansion uses the true coefficient $b$, applying the fitted variance factor and $1-3/(2Q)$ leaves
+\begin{equation*}
+P\{LR^{A,L}_{N,M}\le z\}
+=G_1(z)-\frac{b-b_{\mathrm{AR}}^\dagger}{M}zg_1(z)
++o(M^{-1}+Q^{-1}).
+\end{equation*}
+This proves the misspecification expansion stated in the main paper.
+
+These values are the analytical counterparts of the misspecification designs used in the simulations.
+\begin{table}[htbp]
+\centering
+\small
+\caption{Analytical predictions under dynamic misspecification. Here $\Delta b=b-b_{\mathrm{AR}}^\dagger$ and the final column is the limiting nominal 95\% coverage of the fitted AR(1) Wald interval.}
+\label{tab:supp-misspec-theory}
+\begin{tabular}{lrrrr}
+\toprule
+True process & $\phi^\dagger$ & $r_{\mathrm{AR}}$ & $\Delta b$ & Wald coverage \\
+\midrule
+AR(1), $\phi=0.5$ & 0.500 & 1.000 & 0.000 & 0.950 \\
+AR(1), $\phi=0.8$ & 0.800 & 1.000 & 0.000 & 0.950 \\
+AR(2), $(0.6,0.1)$ & 0.667 & 0.818 & 0.776 & 0.924 \\
+AR(2), $(0.6,0.2)$ & 0.750 & 0.667 & 2.190 & 0.890 \\
+MA(1), $0.8$ & 0.488 & 1.470 & $-0.786$ & 0.983 \\
+ARMA(1,1), $(0.6,-0.4)$ & 0.224 & 0.744 & 0.849 & 0.909 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Simulation and implementation details}
+\label{supp:simulation}
+The numerical study has four parts. The principal experiment simulates the limiting Gaussian block vector directly over a rectangular $(x,Q)$ grid. A separate exact finite-$M$ experiment checks how well that map approximates finite Gaussian AR(1) blocks. Conventional stable-interior simulations assess the higher-order refinement, and a compact misspecification experiment treats AR(1) as a working dependence model. Convex-hull failure is assigned an infinite likelihood ratio throughout. Complete simulation workbooks, R scripts, seeds, and figure-generation code will be supplied in the public GitHub repository accompanying the paper.
+
+\subsection{Rectangular $(x,Q)$ geometry experiment}
+The principal grid is
+\[
+x\in\{0.25,0.5,1,2,3,4,6,8,12\},
+\qquad
+Q\in\{5,6,8,10,15,20,30,50,100,200\}.
+\]
+For each positive-boundary cell we simulate from $N_Q\{0,\Sigma_+(x)\}$. By Appendix~S5, this Gaussian block vector is the boundary limit under the stated iid $4+\delta$ moment condition and does not require Gaussian innovations. For the negative boundary we use the corresponding even-$M$ and odd-$M$ covariance matrices separately. Each cell uses 20,000 replications. The reported methods multiply the same raw scalar empirical-likelihood ratio by one of four factors. Raw uses one, Variance uses the limiting exact variance factor $V_\pm(x)$, Bartlett uses the limiting Gaussian factor $1-a^G/N$, and Combined uses their product. The 4--6\% band in the figures is only a descriptive marker around the nominal 5\% rejection probability.
+
+The boundary theorems justify the first-order variance-calibrated reference laws under the iid moment condition. The Bartlett factor in this rectangular experiment is the covariance continuation of the stable-interior Gaussian term. We do not claim a non-Gaussian higher-order boundary theorem for that continuation.
+
+Figure~\ref{fig:supp-positive-all} displays all four procedures on the positive boundary. The raw and Bartlett-only panels remain badly mis-scaled when $x$ is small even at large $Q$. The variance-calibrated and combined panels instead approach nominal rejection as $Q$ increases, in agreement with the many-block theorem.
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=0.98\textwidth]{Figure_XQ_geometry_positive_all_methods.pdf}
+\caption{Positive-boundary Gaussian $(x,Q)$ map for all four procedures. Each cell uses 20,000 limiting Gaussian block-vector draws. Crosses mark rejection probabilities between 4\% and 6\%.}
+\label{fig:supp-positive-all}
+\end{figure}
+
+Convex-hull failure has two visibly different sources. Figure~\ref{fig:supp-positive-hull} shows very high failure for small $x$ and small $Q$, where positive block correlation compounds the small number of empirical-likelihood observations. As $x$ becomes large, the lower edge approaches the ordinary finite-$Q$ failure phenomenon. For example, failure is $0.4845$ at $(x,Q)=(0.25,5)$ and $0.0664$ at $(12,5)$.
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=0.90\textwidth]{Figure_XQ_hull_failure_positive.pdf}
+\caption{Convex-hull failure probability over the positive-boundary $(x,Q)$ geometry. Failure is common when both the number of blocks is small and positive block correlation is strong.}
+\label{fig:supp-positive-hull}
+\end{figure}
+
+Figures~\ref{fig:supp-negative-even} and~\ref{fig:supp-negative-odd} display the variance-calibrated and combined maps near $-1$. They confirm that parity remains visible at finite $Q$. The odd-$M$ lower-left corner is particularly different from the positive boundary. At $(x,Q)=(0.25,5)$ the combined rejection probability is $0.0162$, so applying the stable-interior Bartlett multiplier there can overcorrect rather than recover a chi-squared law.
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=0.98\textwidth]{Figure_XQ_geometry_negative_evenM_VC_combined.pdf}
+\caption{Negative-boundary Gaussian $(x,Q)$ map for even $M$. Each cell uses 20,000 limiting Gaussian block-vector draws.}
+\label{fig:supp-negative-even}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=0.98\textwidth]{Figure_XQ_geometry_negative_oddM_VC_combined.pdf}
+\caption{Negative-boundary Gaussian $(x,Q)$ map for odd $M$. The small-$(x,Q)$ behavior differs substantially from the even-$M$ case.}
+\label{fig:supp-negative-odd}
+\end{figure}
+
+% Flush all figures belonging to the rectangular (x,Q) geometry experiment
+% before the next subsection begins. This prevents Figure S5 from drifting
+% to the end of the Supporting Information.
+\clearpage
+
+\subsection{Exact finite-$M$ validation}
+The limiting geometry is compared with exact Gaussian AR(1) block distributions for
+\[
+x\in\{0.25,1,3,6\},
+\qquad
+Q\in\{10,20,50\}.
+\]
+For the positive boundary we use $M\in\{20,50,100,200\}$ and $\phi=1-x/M$. For the negative boundary we use even block lengths $20,50,100,200$ and odd block lengths $21,51,101,201$, with $\phi=-1+x/M$. Every finite law and its corresponding limiting law uses 10,000 replications.
+
+There are 576 method-level finite-versus-limit comparisons. The mean absolute difference in rejection probability is $0.0025$, the median is $0.0019$, and the maximum is $0.0117$. Near rejection probability $0.05$, two independent estimates based on 10,000 replications have a difference standard error of about $0.0031$, with expected absolute difference about $0.0025$ even when the two underlying probabilities are equal. The observed mean discrepancy is therefore at the Monte Carlo resolution of the experiment rather than evidence of a systematic approximation error of size $0.0025$. The mean and maximum absolute differences in convex-hull failure probability are $0.00026$ and $0.0035$. The full cell-by-cell comparison is provided in the reproducibility repository.
+
+
+\subsection{Non-Gaussian finite-$M$ boundary validation}
+The preceding finite-$M$ comparison uses Gaussian AR(1) data because exact Gaussian block simulation is convenient. To check that the boundary approximation is not a Gaussian-innovation artifact, we also simulate the AR(1) process directly with three non-Gaussian innovation laws. These are standardized $t_5$, $(\chi_1^2-1)/\sqrt2$, and $E-1$ with $E\sim\operatorname{Exp}(1)$. All have mean zero and variance one, and each satisfies the moment assumption used in Appendix~S5 for some $\delta>0$.
+
+We set $x=1$. The positive design uses $(M,Q)=(100,10)$ and $\phi=0.99$. The negative designs cover all attainable parity configurations used in the theory. They use $(M,Q)=(100,10)$ for even $M$, $(101,10)$ for odd $M$ and even $Q$, and $(101,7)$ for odd $M$ and odd $Q$, with $\phi=-1+1/M$. Each finite design uses 20,000 replications after a 3,000-observation burn-in. For each regime, the 5\% cutoff and the limiting convex-hull probability are obtained independently from 300,000 draws from the corresponding Gaussian boundary vector. Convex-hull failures remain coded as $+\infty$ when computing the two-sample Kolmogorov--Smirnov distance.
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\caption{Non-Gaussian finite-$M$ validation of the variance-calibrated finite-$Q$ boundary law at $x=1$. Rejection uses the 5\% cutoff of the corresponding limiting boundary distribution. Hull columns give finite-sample and limiting convex-hull failure probabilities. KS is the two-sample Kolmogorov--Smirnov distance between the finite-$M$ and limiting extended distributions.}
+\label{tab:supp-nongaussian-boundary-validation}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrlrrrr}
+\toprule
+Regime & $Q$ & $M$ & Innovation & Rejection & Hull finite & Hull limit & KS \\
+\midrule
+Positive & 10 & 100 & standardized $t_5$ & 0.0505 & 0.0326 & 0.0312 & 0.0099 \\
+Positive & 10 & 100 & centered $\chi_1^2$ & 0.0505 & 0.0297 & 0.0312 & 0.0057 \\
+Positive & 10 & 100 & centered exponential & 0.0515 & 0.0327 & 0.0312 & 0.0059 \\
+\addlinespace
+Negative, even $M$ & 10 & 100 & standardized $t_5$ & 0.0515 & 0.0007 & 0.0006 & 0.0048 \\
+Negative, even $M$ & 10 & 100 & centered $\chi_1^2$ & 0.0504 & 0.0008 & 0.0006 & 0.0061 \\
+Negative, even $M$ & 10 & 100 & centered exponential & 0.0506 & 0.0006 & 0.0006 & 0.0044 \\
+\addlinespace
+Negative, odd $M$, even $Q$ & 10 & 101 & standardized $t_5$ & 0.0515 & 0.0002 & 0.0002 & 0.0034 \\
+Negative, odd $M$, even $Q$ & 10 & 101 & centered $\chi_1^2$ & 0.0525 & 0.0002 & 0.0002 & 0.0045 \\
+Negative, odd $M$, even $Q$ & 10 & 101 & centered exponential & 0.0515 & 0.0002 & 0.0002 & 0.0076 \\
+\addlinespace
+Negative, odd $M$, odd $Q$ & 7 & 101 & standardized $t_5$ & 0.0496 & 0.0033 & 0.0032 & 0.0083 \\
+Negative, odd $M$, odd $Q$ & 7 & 101 & centered $\chi_1^2$ & 0.0490 & 0.0036 & 0.0032 & 0.0041 \\
+Negative, odd $M$, odd $Q$ & 7 & 101 & centered exponential & 0.0498 & 0.0034 & 0.0032 & 0.0098 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+The finite-$M$ rejection probabilities range from 0.0490 to 0.0525. The KS distances are at most $0.0099$, which is close to the 5\% two-sample KS resolution for the present sample sizes in the largest cases. The results are therefore supportive rather than a high-precision validation of distributional equality. The convex-hull probabilities also track the parity-specific limits. This experiment checks the first-order non-Gaussian boundary theorem and does not validate the stable-interior Bartlett continuation at the boundary.
+
+\subsection{Stable-interior simulations}
+The correctly specified stable-interior experiment uses $N\in\{256,512,1024\}$, $\phi\in\{0.5,0.8\}$, and $M=\lfloor\sqrt N\rfloor$. Innovations are Gaussian, a smooth compact-support distribution satisfying the stated higher-order assumptions, centered exponential, and centered standardized $\chi_1^2$. The latter two laws are outside Condition~(A3) and are included only as robustness checks, not as cases covered by the stable-interior higher-order assumptions. The main manuscript reports raw BEL, the model-free leading correction, the AR(1)-specific refinement, AR-Wald, and self-normalized inference. The computational archive also contains HAC-Wald and stationary-bootstrap sensitivity checks from the earlier broad comparison. Each setting uses 10,000 replications. The AR(1)-specific statistic evaluates the closed forms \eqref{eq:supp-aG-refined} and \eqref{eq:supp-aK-refined} at the projected Burg estimate and residual skewness and kurtosis. The full covariance functional is used only in the derivation.
+
+Under correct specification, the AR(1)-specific refinement has its largest advantage when persistence is high and $N$ is moderate. The difference from the model-free correction becomes small as $N$ increases. Separate block-sensitivity grids are retained in the computational archive, but they are not used to define a block-length selector because the differences over neighboring choices are too small to support a unique empirical optimum.
+
+\subsection{Direct fixed-$Q$ boundary check}
+For a separate check of the finite-$Q$ theorem, we fix $Q=20$, increase $M$, set $N=QM$, and use $\phi_M=1-x/M$ or $\phi_M=-1+x/M$ for fixed values of $x$. The number of block observations therefore remains 20 while the blocks become longer and persistence moves closer to the corresponding boundary. Only exact variance calibration is applied. The table is retained because it checks the fixed-$Q$ law directly rather than through the rectangular limiting experiment.
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\caption{Fixed-$Q$ variance-calibrated boundary results with $Q=20$. Coverage and the 95\% quantile ratio are averaged across the four block lengths. The coverage range records the minimum and maximum across $M$. The failure column is the largest convex-hull failure rate.}
+\label{tab:boundary-vc}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrr}
+\toprule
+Regime & $x$ & Coverage & Coverage range & Failure & KS to $\chi_1^2$ & Pairwise KS & $q_{0.95}$ ratio \\
+\midrule
+Negative, even $M$ & 0.25 & 0.935 & $[0.930,0.936]$ & 0.000 & 0.021 & 0.013 & 1.143 \\
+Negative, even $M$ & 1.00 & 0.935 & $[0.933,0.937]$ & 0.000 & 0.020 & 0.014 & 1.128 \\
+Negative, even $M$ & 2.00 & 0.932 & $[0.929,0.935]$ & 0.000 & 0.026 & 0.018 & 1.171 \\
+Negative, odd $M$ & 0.80 & 0.928 & $[0.927,0.931]$ & 0.000 & 0.026 & 0.020 & 1.212 \\
+Negative, odd $M$ & 1.80 & 0.932 & $[0.931,0.933]$ & 0.000 & 0.026 & 0.024 & 1.181 \\
+Negative, odd $M$ & 3.00 & 0.932 & $[0.931,0.934]$ & 0.000 & 0.026 & 0.014 & 1.177 \\
+Positive & 0.25 & 0.832 & $[0.829,0.835]$ & 0.048 & 0.138 & 0.016 & 4.847 \\
+Positive & 1.00 & 0.916 & $[0.912,0.918]$ & 0.001 & 0.051 & 0.012 & 1.346 \\
+Positive & 4.00 & 0.932 & $[0.929,0.937]$ & 0.000 & 0.027 & 0.018 & 1.176 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+Across these settings, finite-$M$ distributions are already close to the corresponding $V_\pm(x)\mathcal E_Q\{Z_\pm(x)\}$ limits. The strongest positive-boundary design also shows that exact variance calibration cannot restore a chi-squared law when the number of empirical-likelihood observations is fixed.
+
+\subsection{Dynamic misspecification}
+The misspecification experiment uses Gaussian AR(2), MA(1), and ARMA(1,1) processes. The analytical direction in Appendix~\ref{supp:misspec} is reproduced. AR-Wald retains the order-one scale error predicted there, while the leading AR(1)-calibrated BEL discrepancy is attenuated by block length. Neither corrected BEL procedure uniformly dominates across all misspecified designs. These results concern AR(1) as a working variance model inside the stable region. The fitted coordinate $M(1-|\phi^\dagger|)$ should not be interpreted as the true dependence scale of an arbitrary misspecified process.
+
+\section{Empirical illustration and additional details}
+\label{supp:empirical}
+The VIX application uses daily CBOE closes from FRED (VIXCLS) over January 1990--December 2024 \citep{FRED:VIXCLS}. Daily closes are averaged within each month and then logged. The resulting monthly series has $N=420$, $\bar X=2.90965$, $\exp(\bar X)=18.350$, and sample standard deviation $0.33270$. The Burg estimate is $0.88274$, while the bias-reduced projected estimate is $\widetilde\phi=0.89149$. The projection does not bind.
+
+\subsection{Working-model diagnostics}
+BIC selects AR order one. The intercept-only ADF statistic is $-5.11$ and rejects a unit root at 1\%, whereas the KPSS level-stationarity statistic is $0.211$ and does not reject at 10\%. The $p$-values for adding lags 2--4, residual Ljung--Box(12), squared-residual Ljung--Box(12), ARCH LM(12), and recursive CUSUM are $0.0846$, $0.1329$, $0.9965$, $0.9962$, and $0.8880$. Residual skewness and excess kurtosis are $1.756$ and $7.659$. On that basis we use AR(1) as a working dependence model. The observed-data intervals still use the residual-moment refinement, so Gaussian innovation shape is not imposed on VIX.
+
+\subsection{Reference distributions along the VIX path}
+For long blocks we keep the statistic $LR^V$ fixed and vary only its reference law. The three choices are $\chi_1^2$, the interior finite-$Q$ law $\mathcal E_Q(Z_1,\ldots,Z_Q)$ for independent standard Gaussian block observations, and the positive local-boundary law $V_+(x)\mathcal E_Q\{Z_+(x)\}$. The last law retains the dependence indexed by $x$. Each non-Wilks critical value is based on 300,000 draws. Their finite-sample performance is then checked independently with 100,000 draws from the exact Gaussian AR(1) block covariance at $\widetilde\phi=0.891485$.
+
+The distinction between small and moderate $x$ along the large-$Q$ part of the empirical path is not a distinction between two different procedures. The combined statistic can be used throughout that part of the path. When $x$ is small, the first-order correction is driven by the variance factor because raw BEL has a block-scale variance mismatch. When $x$ is larger, that mismatch is smaller and the Bartlett factor acts as a higher-order refinement. In the formal many-block local-boundary limit, variance calibration is the component needed to restore the chi-squared law, while the stable-interior higher-order interpretation of the Bartlett factor applies away from the boundary. Thus the central part of the path is favorable because neither correction is extreme, not because it uses a separate ``middle-regime'' statistic.
+
+\begin{table}[htbp]
+\centering
+\caption{Comparison of reference laws along the VIX block path. The columns $c_Q$ and $c_{x,Q}$ are the 95\% critical values of the interior finite-$Q$ law and the $x$-dependent finite-$Q$ law. The last three columns give exact finite-sample Gaussian rejection probabilities for the same variance-calibrated BEL statistic using the chi-squared, interior finite-$Q$, and $x,Q$ cutoffs.}
+\label{tab:supp-vix-boundary-compact}
+\scriptsize
+\setlength{\tabcolsep}{3.0pt}
+\begin{tabular}{rrrrrrrr}
+\toprule
+$M$ & $Q$ & $x_M$ & $c_Q$ & $c_{x,Q}$ & $\chi_1^2$ & Finite-$Q$ & $x,Q$ \\
+\midrule
+12 & 35 & 1.302 & 4.128 & 4.270 & 0.0633 & 0.0549 & 0.0513 \\
+15 & 28 & 1.628 & 4.196 & 4.400 & 0.0660 & 0.0552 & 0.0499 \\
+20 & 21 & 2.170 & 4.428 & 4.636 & 0.0704 & 0.0536 & 0.0490 \\
+28 & 15 & 3.038 & 4.901 & 5.161 & 0.0830 & 0.0541 & 0.0490 \\
+35 & 12 & 3.798 & 5.392 & 5.743 & 0.0922 & 0.0536 & 0.0478 \\
+42 & 10 & 4.558 & 6.068 & 6.455 & 0.1046 & 0.0537 & 0.0490 \\
+60 & 7  & 6.511 & 9.251 & 10.272 & 0.1399 & 0.0560 & 0.0505 \\
+70 & 6  & 7.596 & 13.724 & 17.038 & 0.1637 & 0.0568 & 0.0504 \\
+84 & 5  & 9.115 & $\infty$ & $\infty$ & 0.1966 & -- & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The two long-block effects are visible separately. At $M=42$, using the interior finite-$Q$ reference reduces rejection from 10.46\% to 5.37\%, and the full $x,Q$ reference gives 4.90\%. At $M=70$ the three values are 16.37\%, 5.68\%, and 5.04\%. Finite $Q$ accounts for most of the distortion, but the dependence indexed by $x$ is still relevant when only a few blocks remain. At $Q=5$, the independent finite-$Q$ convex-hull failure probability is already $2^{1-Q}=0.0625$, and the exact finite-sample Gaussian value is $0.0735$. Under the usual BEL convention, a finite nonrandomized 5\% cutoff is then unavailable.
+
+\subsection{Sensitivity to estimating the local coordinate}
+The boundary theorem treats $x$ as fixed. This is a substantive restriction because under fixed-$Q$ local-boundary asymptotics $x$ is a local parameter and $M(1-\widehat\phi)$ need not converge in probability to the true $x$. Thus neither an ordinary Slutsky argument nor the compact-stability plug-in theorem justifies an estimated-$x$ boundary cutoff. To see how much same-sample estimation matters numerically in the present application, we ran 50,000 stationary Gaussian AR(1) replications of length 420 with $\phi=0.89149$. In each replication we recompute the bias-reduced projected Burg estimate, the variance factor, and $\widehat x_M=M(1-\widetilde\phi)$. The critical value at $\widehat x_M$ is interpolated from a dense simulation grid of the positive-boundary law. Each curve is rescaled to match the 300,000-draw critical value at the fitted $x_M$, which removes small Monte Carlo level differences in the lookup grid.
+
+Table~\ref{tab:supp-vix-x-plugin} compares ordinary chi-squared calibration with boundary calibration. The fixed-$x$ and estimated-$x$ columns both use the re-estimated variance factor. They differ only in the local coordinate used for the boundary critical value. The estimated-$x$ rejection probability is reported among replications for which a finite cutoff exists.
+
+\begin{table}[H]
+\centering
+\caption{Same-sample estimation check for the positive-boundary calibration. The chi-squared column uses the re-estimated variance factor. The next two columns use boundary critical values with either the fitted $x_M$ or the re-estimated $\widehat x_M$. The final column gives the proportion of replications with a finite estimated-$x$ cutoff.}
+\label{tab:supp-vix-x-plugin}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{rrrrrrr}
+\toprule
+$M$ & $Q$ & $x_M$ & VC $\chi_1^2$ & Boundary with $x_M$ & Boundary with $\widehat x_M$ & Finite cutoff \\
+\midrule
+20 & 21 & 2.170 & 0.07312 & 0.05144 & 0.05202 & 0.99994 \\
+28 & 15 & 3.038 & 0.08462 & 0.05128 & 0.05184 & 0.99994 \\
+35 & 12 & 3.798 & 0.09364 & 0.05094 & 0.05134 & 0.99994 \\
+42 & 10 & 4.557 & 0.10556 & 0.04994 & 0.05028 & 0.99994 \\
+60 & 7  & 6.511 & 0.13954 & 0.05018 & 0.05076 & 0.99994 \\
+70 & 6  & 7.596 & 0.15994 & 0.04958 & 0.04986 & 0.99724 \\
+84 & 5  & 9.115 & 0.19102 & -- & -- & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+For $Q\ge6$, estimating the local coordinate has little additional effect in this design. After the variance factor has already been estimated, replacing $x_M$ by $\widehat x_M$ changes rejection by only 0.02--0.06 percentage points. At $Q=6$ a finite cutoff is still available in 99.724\% of replications. At $Q=5$ the convex-hull failure probability is $0.0694$, so no finite 5\% cutoff is available. These calculations therefore show local numerical stability for the VIX design, not a general plug-in result for the fixed-$Q$ boundary experiment.
+
+\subsection{Observed-data intervals and benchmark calibration}
+The observed VIX intervals make the cost of small $Q$ visible. At $M=42$, the variance-calibrated intervals based on chi-squared, interior finite-$Q$, and fitted-$x$ finite-$Q$ references are $[15.84,21.43]$, $[15.35,22.22]$, and $[15.28,22.34]$. At $M=70$ they are $[16.11,20.93]$, $[15.02,22.46]$, and $[14.88,22.67]$. Keeping the combined residual-moment correction but using chi-squared gives Gaussian rejection probabilities of 8.43\% and 12.79\% at $M=42$ and $M=70$, with intervals $[15.67,21.70]$ and $[15.86,21.27]$. Bartlett refinement helps but cannot replace the finite-$Q$ reference law once only a few blocks remain. The representative central choice $M=12$ gives the shorter combined chi-squared interval $[16.04,21.09]$. Hence correct calibration at long block lengths comes with a real loss of information. We use the central calibrated part of the path for primary reporting when it is available and treat the non-Wilks results as an extension and a sensitivity check. The fitted-$x$ intervals remain numerical sensitivity calculations because the theorem does not cover estimation of the local coordinate. No estimated optimal block length is defined from these comparisons.
+
+We also simulated the two non-EL benchmark procedures under the fitted Gaussian AR(1) model. Using 200,000 stationary series of length 420, AR-Wald rejects 5.90\% of the time when the Burg coefficient and innovation variance are re-estimated in every replication. The self-normalized procedure rejects 6.62\% using the same limiting critical-value construction as in the empirical analysis. The Monte Carlo standard errors are about 0.00053 and 0.00056. The observed-data benchmark intervals are reported in the main paper.
+
+\section{References}
+\begin{thebibliography}{99}
+
+\bibitem[Alksnis and Valeinis(2026)]{Alksnis.Valeinis:2026}
+Alksnis, R. and Valeinis, J. (2026).
+Variance calibration and higher-order accuracy for nonoverlapping blockwise empirical likelihood under weak dependence.
+Preprint, Zenodo, doi: \href{https://doi.org/10.5281/zenodo.21893245}{10.5281/zenodo.21893245}.
+
+\bibitem[Brockwell and Davis(1991)]{Brockwell.Davis:1991}
+Brockwell, P. J. and Davis, R. A. (1991).
+\emph{Time Series: Theory and Methods}, 2nd ed., Springer, New York, doi: \href{https://doi.org/10.1007/978-1-4419-0320-4}{10.1007/978-1-4419-0320-4}.
+
+\bibitem[Burg(1968)]{Burg:1968}
+Burg, J. P. (1968).
+A new analysis technique for time series data, in \emph{NATO Advanced Study Institute on Signal Processing with Emphasis on Underwater Acoustics}, Enschede, The Netherlands, 12--23 August 1968.
+
+\bibitem[Chicago Board Options Exchange(2026)]{FRED:VIXCLS}
+Chicago Board Options Exchange (2026).
+CBOE Volatility Index: VIX, FRED series VIXCLS, Federal Reserve Bank of St. Louis,
+\href{https://fred.stlouisfed.org/series/VIXCLS}{fred.stlouisfed.org/series/VIXCLS},
+accessed 15 August 2026.
+
+\bibitem[Lahiri(2006)]{Lahiri:2006preprint}
+Lahiri, S. N. (2006).
+Asymptotic expansions for sums of block-variables under weak dependence, preprint version.
+\href{https://arxiv.org/abs/math/0606739v1}{arXiv:math/0606739v1}.
+
+\bibitem[Lahiri(2007)]{Lahiri:2007}
+Lahiri, S. N. (2007).
+Asymptotic expansions for sums of block-variables under weak dependence.
+\emph{The Annals of Statistics} 35, 1324--1350, doi: \href{https://doi.org/10.1214/009053607000000190}{10.1214/009053607000000190}.
+
+\bibitem[Zhang and McLeod(2006)]{Zhang.McLeod:2006}
+Zhang, Y. and McLeod, A. I. (2006).
+Computer algebra derivation of the bias of linear estimators of autoregressive models.
+\emph{Journal of Time Series Analysis} 27, 157--165, doi: \href{https://doi.org/10.1111/j.1467-9892.2005.00459.x}{10.1111/j.1467-9892.2005.00459.x}.
+
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+title: "Reproducibility code for Block-Scale Persistence and Block Count in Blockwise Empirical Likelihood for a First-Order Autoregression"
+message: "If you use this code, please cite the accompanying article."
+type: software
+authors:
+  - family-names: Alksnis
+    given-names: Reinis
+  - family-names: Valeinis
+    given-names: Janis
+date-released: 2026-08-20
+version: 1.0.0

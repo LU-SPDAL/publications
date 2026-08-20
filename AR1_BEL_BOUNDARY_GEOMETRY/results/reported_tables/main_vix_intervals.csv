@@ -1,0 +1,12 @@
+procedure,M,Q,gaussian_calibration,lower,upper
+"Raw BEL, chi-square",2.0,210.0,0.519,17.59,19.2
+"Combined correction, chi-square",2.0,210.0,0.0523,16.22,21.35
+"Combined correction, chi-square",12.0,35.0,0.0522,16.04,21.09
+"VC, chi-square",42.0,10.0,0.1046,15.84,21.43
+"VC, interior finite-Q",42.0,10.0,0.0537,15.35,22.22
+"VC, x,Q reference",42.0,10.0,0.049,15.28,22.34
+"VC, chi-square",70.0,6.0,0.1637,16.11,20.93
+"VC, interior finite-Q",70.0,6.0,0.0568,15.02,22.46
+"VC, x,Q reference",70.0,6.0,0.0504,14.88,22.67
+AR-Wald,,,0.059,16.01,21.03
+Self-normalized,,,0.0662,16.43,20.49
