@@ -1,0 +1,4 @@
+setting,method,coverage_95
+N1=N2=216_phi1=phi2=0.8_average_over_four_innovation_pairs,BEL,0.800
+N1=N2=216_phi1=phi2=0.8_average_over_four_innovation_pairs,ABEL,0.808
+N1=N2=216_phi1=phi2=0.8_average_over_four_innovation_pairs,VC+ABEL,0.940

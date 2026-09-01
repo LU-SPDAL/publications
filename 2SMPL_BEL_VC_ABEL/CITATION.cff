@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use these materials, please cite the accompanying paper."
+title: "Variance-Calibrated Adjusted Two-Sample Blockwise Empirical Likelihood for the Difference of Means"
+type: software
+authors:
+  - family-names: Alksnis
+    given-names: Reinis
+  - family-names: Valeinis
+    given-names: Janis
+year: 2026
+repository-code: "https://github.com/LU-SPDAL/publications/tree/main/2SMPL_BEL_VC_ABEL"

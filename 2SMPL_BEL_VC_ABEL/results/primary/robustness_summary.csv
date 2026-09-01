@@ -1,0 +1,5 @@
+design,n_cells,BEL_coverage_95,VC_ABEL_coverage_95
+AR1_MA2_robustness,9,0.931,0.949
+sample_size_and_scale_imbalance,24,0.903,0.946
+common_block_lengths,24,0.924,0.950
+unequal_block_lengths,4,0.927,0.947

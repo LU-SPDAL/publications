@@ -1,0 +1,6 @@
+bandwidth_rule,VC_ABEL_coverage_95
+0.75_M^(2/3),0.906
+log_N,0.923
+log_N_loglog_N,0.945
+2_log_N,0.947
+min_2M_4logN,0.954

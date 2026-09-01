@@ -1,0 +1,10 @@
+quantity,value
+mean_BEL_coverage_95,0.9214
+mean_VC_ABEL_coverage_95,0.9504
+mean_HAC_Wald_coverage_95,0.9104
+VC_ABEL_equal_dependence_min,0.9493
+VC_ABEL_equal_dependence_max,0.9532
+VC_ABEL_asymmetric_gaussian_min,0.9465
+VC_ABEL_asymmetric_gaussian_max,0.9570
+VC_ABEL_asymmetric_skew_min,0.9476
+VC_ABEL_asymmetric_skew_max,0.9560

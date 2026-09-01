@@ -1,0 +1,7 @@
+design,Q1,Q2,M,BEL_failure_pct,coverage_chisq,coverage_fixedQ
+balanced,18,18,12,0.00,0.9236,0.9284
+balanced,12,12,18,0.00,0.9274,0.9382
+balanced,9,9,24,0.03,0.9228,0.9424
+balanced,6,6,36,0.34,0.9096,0.9446
+balanced,4,4,54,3.39,0.8918,0.9616
+imbalance_1to2,4,8,54,0.50,0.8924,0.9536
