@@ -1,7 +1,7 @@
 # SPDAL Publications
 This GitHub repository is used to provide supplementary materials for SPDAL team research outputs.
 
-* [Empirical likelihood for generalized smoothly trimmed mean](https://arxiv.org/abs/2409.05631) (folder: EL_STM)
+* [Empirical likelihood for generalized smoothly trimmed mean](https://doi.org/10.1080/02331888.2026.2762181) (folder: EL_STM)
 * [Change-point analysis using two-sample empirical likelihood method](https://doi.org/10.1080/02664763.2025.2543051) (folder: CP_EL_2SAMP)
 * [Empirical likelihood inference for L-estimators](http://dx.doi.org/10.1080/03610926.2026.2641782) (folder: Multi_sample_Ln)
 * [Two-sample empirical likelihood method for right censored data](https://doi.org/10.1515/ijb-2024-0120) (folder: 2SAMP_EL_SURV)
